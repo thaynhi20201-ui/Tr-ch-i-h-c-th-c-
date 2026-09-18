@@ -3,866 +3,402 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trò Chơi Kéo Co Địa Lý 5v5</title>
-  <!-- Tailwind CSS CDN for instant beautiful UI styling -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    * {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      box-sizing: border-box;
-    }
-    @keyframes pulse-flag {
-      0%, 100% { transform: rotate(-5deg); }
-      50% { transform: rotate(5deg); }
-    }
-    .animate-flag {
-      animation: pulse-flag 0.8s ease-in-out infinite;
-    }
-    @keyframes dust-burst {
-      0% { transform: scale(0.6); opacity: 0.8; }
-      100% { transform: scale(1.6); opacity: 0; }
-    }
-    .dust-fx {
-      animation: dust-burst 0.5s ease-out forwards;
-    }
-    .rope-pattern {
-      background: repeating-linear-gradient(45deg, #b45309, #b45309 4px, #d97706 4px, #d97706 8px, #f59e0b 8px, #f59e0b 12px);
-    }
-  </style>
+  <title>Trò Chơi Kéo Co Địa Lý 5v5 - Bản Độc Lập Offline</title>
+  <meta name="description" content="Trò chơi kéo co đối kháng 5v5 giữa Đội Xanh và Đội Đỏ, tích hợp câu hỏi Địa lý: trả lời đúng kéo 1 nhịp, trả lời sai đối thủ kéo 2 nhịp. Hỗ trợ tùy chỉnh câu hỏi và thời gian 30s/60s/90s." />
+  <link rel="stylesheet" href="./style.css">
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center p-2 sm:p-4">
+<body>
 
-  <!-- TOP HEADER -->
-  <header class="w-full max-w-7xl flex flex-wrap items-center justify-between gap-3 bg-slate-900/90 border border-slate-800 rounded-2xl px-4 py-3 shadow-xl mb-4">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-amber-500 to-red-500 flex items-center justify-center text-xl shadow-md">
-        🚩
-      </div>
-      <div>
-        <h1 class="text-base sm:text-lg font-black tracking-tight text-white flex items-center gap-2">
-          TRÒ CHƠI KÉO CO ĐỊA LÝ 5v5
-          <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">10 Câu Hỏi</span>
-        </h1>
-        <p class="text-xs text-slate-400">Đúng kéo 1 nhịp • Sai đối thủ kéo 2 nhịp • 30s/câu</p>
-      </div>
-    </div>
+  <div class="app-wrapper">
 
-    <!-- Mode and Controls -->
-    <div class="flex items-center gap-2">
-      <select id="game-mode-select" class="bg-slate-800 border border-slate-700 text-xs font-bold text-slate-200 rounded-xl px-3 py-2 outline-none cursor-pointer">
-        <option value="bot">Đấu với Máy (Đội Đỏ AI)</option>
-        <option value="pvp">2 Người chơi (Xanh vs Đỏ)</option>
-      </select>
-
-      <button id="btn-sound-toggle" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 rounded-xl px-3 py-2 flex items-center gap-1.5 transition-colors">
-        🔊 <span id="sound-label">Bật</span>
-      </button>
-
-      <button id="btn-restart-match" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black rounded-xl px-3.5 py-2 shadow-md flex items-center gap-1.5 transition-all">
-        🔄 Ván mới
-      </button>
-
-      <button id="btn-download-html" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black rounded-xl px-3 py-2 shadow-md flex items-center gap-1 transition-all" title="Lưu file HTML này về máy tính để mở offline">
-        📥 Tải HTML
-      </button>
-    </div>
-  </header>
-
-  <!-- MAIN 3-COLUMN LAYOUT -->
-  <!-- Left: Đội Xanh | Middle: Bảng Kéo Co Nhỏ Gọn | Right: Đội Đỏ -->
-  <main class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-[1fr_310px_1fr] lg:grid-cols-[1fr_340px_1fr] items-start gap-4">
-
-    <!-- 1. CỘT TRÁI: BẢNG CÂU HỎI ĐỘI XANH -->
-    <section id="blue-panel" class="w-full bg-slate-900 border-2 border-blue-500/50 rounded-2xl p-4 sm:p-5 shadow-2xl flex flex-col gap-4 relative overflow-hidden transition-all">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center font-black text-white shadow-md">
-            X
+    <!-- HEADER -->
+    <header class="main-header" id="main-header">
+      <div class="brand-section">
+        <div class="brand-logo" id="brand-logo">🚩</div>
+        <div>
+          <div class="brand-title">
+            TRÒ CHƠI KÉO CO ĐỊA LÝ 5v5
+            <span class="brand-badge" id="header-q-badge">10 Câu Hỏi</span>
           </div>
-          <div>
-            <div class="text-sm font-black text-blue-400 flex items-center gap-1.5">
-              ĐỘI XANH
-              <span id="blue-turn-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500 text-white animate-pulse">LƯỢT TRẢ LỜI</span>
-            </div>
-            <div class="text-xs text-slate-400">Đúng: <span id="blue-score" class="font-bold text-blue-300">0</span>/10</div>
-          </div>
-        </div>
-
-        <!-- 30s Timer Display -->
-        <div class="flex flex-col items-end">
-          <div class="flex items-center gap-1 font-mono font-black text-base" id="blue-timer-text">
-            ⏱️ <span id="blue-countdown" class="text-blue-400">30s</span>
-          </div>
-          <div class="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden mt-1">
-            <div id="blue-timer-bar" class="h-full bg-blue-500 w-full transition-all duration-300"></div>
-          </div>
+          <div class="brand-sub">Đúng kéo 1 nhịp (+15%) • Sai đối thủ kéo 2 nhịp (+30%) • 30s/60s/90s</div>
         </div>
       </div>
 
-      <!-- Blue Roster 5 Players -->
-      <div class="flex items-center gap-1.5 flex-wrap bg-slate-950/60 p-2 rounded-xl border border-slate-800/80">
-        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">5 Thành viên:</span>
-        <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-md bg-blue-950 text-blue-300 border border-blue-800">#1 Quá</span>
-        <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-md bg-blue-950 text-blue-300 border border-blue-800">#2 Mập</span>
-        <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-md bg-blue-950 text-blue-300 border border-blue-800">#3 Nhiên</span>
-        <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-md bg-blue-950 text-blue-300 border border-blue-800">#4 Hạo</span>
-        <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-md bg-blue-950 text-blue-300 border border-blue-800">#5 Lý</span>
+      <div class="header-toolbar">
+        <select id="select-game-mode" class="action-select" title="Chọn chế độ chơi">
+          <option value="bot">🤖 Đấu với Máy (AI)</option>
+          <option value="pvp">👥 2 Người chơi (PvP)</option>
+        </select>
+
+        <div class="toolbar-group" title="Thời gian trả lời mỗi câu">
+          <span class="toolbar-label">⏱️</span>
+          <select id="select-turn-time" class="action-select" title="Chọn thời gian trả lời">
+            <option value="30">30 giây</option>
+            <option value="60">60 giây</option>
+            <option value="90">90 giây</option>
+          </select>
+        </div>
+
+        <button id="btn-manage-questions" class="action-btn btn-gold" title="Thêm, sửa, xóa danh sách câu hỏi">
+          📝 Quản lý câu hỏi <span id="q-count-badge" class="badge-count">10</span>
+        </button>
+
+        <button id="btn-toggle-sound" class="action-btn" title="Bật/Tắt âm thanh">
+          🔊 <span id="sound-status-text">Bật</span>
+        </button>
+
+        <button id="btn-show-rules" class="action-btn" title="Xem luật chơi">
+          📖 Luật chơi
+        </button>
+
+        <button id="btn-show-roster" class="action-btn" title="Xem danh sách 10 vận động viên">
+          👥 Đội hình
+        </button>
+
+        <button id="btn-reset-game" class="action-btn btn-blue" title="Bắt đầu ván mới">
+          🔄 Ván mới
+        </button>
       </div>
+    </header>
 
-      <!-- Question Card for Blue -->
-      <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-4">
-        <div class="flex items-center justify-between text-xs text-slate-400 mb-2 font-bold">
-          <span>CÂU HỎI <span id="blue-q-num">1</span>/10</span>
-          <span class="text-amber-400">Chủ đề Địa lý</span>
-        </div>
-        <p id="blue-question-text" class="text-base sm:text-lg font-black text-slate-100 leading-snug min-h-[58px]">
-          Đang tải câu hỏi...
-        </p>
-      </div>
+    <!-- MAIN 3-COLUMN BATTLE LAYOUT -->
+    <main class="battle-grid">
 
-      <!-- 4 Options A, B, C, D -->
-      <div id="blue-options-container" class="grid grid-cols-1 gap-2.5">
-        <!-- Generated by JS -->
-      </div>
-    </section>
-
-    <!-- 2. CỘT GIỮA: BẢNG KÉO CO NHỎ GỌN TRUNG TÂM -->
-    <section class="w-full flex flex-col gap-3">
-      
-      <!-- Mini Rope Arena -->
-      <div id="rope-arena" class="relative w-full rounded-2xl border-4 border-amber-900/40 bg-gradient-to-b from-sky-300 via-emerald-200 to-amber-200 shadow-2xl overflow-hidden select-none" style="height: 220px;">
-        
-        <!-- Stadium Silhouette background -->
-        <div class="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-sky-400/40 to-transparent pointer-events-none">
-          <div class="absolute inset-x-0 bottom-0 flex justify-around opacity-20">
-            <div class="w-3 h-6 bg-slate-800 rounded-t-full"></div>
-            <div class="w-3 h-8 bg-slate-800 rounded-t-full"></div>
-            <div class="w-3 h-7 bg-slate-800 rounded-t-full"></div>
-            <div class="w-3 h-9 bg-slate-800 rounded-t-full"></div>
-            <div class="w-3 h-6 bg-slate-800 rounded-t-full"></div>
-            <div class="w-3 h-8 bg-slate-800 rounded-t-full"></div>
-          </div>
-        </div>
-
-        <!-- Header Win Lines Info -->
-        <div class="absolute top-1.5 inset-x-0 flex justify-between px-2 text-[9px] font-extrabold z-10 pointer-events-none">
-          <span class="bg-blue-600/20 text-blue-900 px-1.5 py-0.5 rounded border border-blue-400">VẠCH XANH</span>
-          <span class="bg-red-600/20 text-red-900 px-1.5 py-0.5 rounded border border-red-400">VẠCH ĐỎ</span>
-        </div>
-
-        <!-- Arena Ground and Markings -->
-        <div class="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-amber-300 via-amber-200 to-emerald-300 border-t border-amber-400">
-          <!-- Center 0 Chalk line -->
-          <div class="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-1 bg-white/90 shadow flex flex-col items-center">
-            <div class="w-2.5 h-2.5 rounded-full bg-amber-500 border border-white -mt-1 shadow"></div>
-            <span class="text-[8px] font-black text-amber-900 mt-0.5">0</span>
-          </div>
-
-          <!-- Left Win Line (-100%) -->
-          <div class="absolute left-[8%] top-0 bottom-0 w-0.5 bg-blue-600 border-l border-dashed border-blue-500">
-            <span class="text-[7px] font-bold text-blue-900 absolute top-1 -left-3 bg-blue-100 px-0.5 rounded">Thắng</span>
-          </div>
-          <!-- Right Win Line (+100%) -->
-          <div class="absolute right-[8%] top-0 bottom-0 w-0.5 bg-red-600 border-r border-dashed border-red-500">
-            <span class="text-[7px] font-bold text-red-900 absolute top-1 -right-3 bg-red-100 px-0.5 rounded">Thắng</span>
-          </div>
-        </div>
-
-        <!-- Dynamic Shift Container (Rope + 10 Characters) -->
-        <div id="dynamic-pull-stage" class="relative w-full h-full flex items-center justify-center transition-transform duration-300 ease-out" style="transform: translateX(0px);">
-          
-          <!-- The Twisted Rope -->
-          <div class="absolute inset-x-0 top-[96px] h-3 z-20 pointer-events-none flex items-center">
-            <div class="w-full h-2.5 rope-pattern rounded-full shadow border-y border-amber-950/40"></div>
-            
-            <!-- Red Flag in middle -->
-            <div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex flex-col items-center">
-              <div class="w-3 h-3 rounded-full bg-red-600 border-2 border-white shadow flex items-center justify-center">
-                <div class="w-1 h-1 rounded-full bg-white"></div>
+      <!-- 1. BẢNG CÂU HỎI ĐỘI XANH (BÊN TRÁI) -->
+      <section id="blue-panel" class="quiz-panel blue-active">
+        <div class="panel-head">
+          <div class="team-info">
+            <div class="team-icon blue">X</div>
+            <div>
+              <div class="team-name-row blue">
+                ĐỘI XANH
+                <span id="blue-status-pill" class="status-pill active-blue">LƯỢT TRẢ LỜI</span>
               </div>
-              <div class="w-2 h-6 bg-gradient-to-b from-red-600 to-red-700 shadow border-x border-b border-red-800 animate-flag origin-top"></div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                Đúng: <strong id="blue-score-num" style="color: var(--blue-light);">0</strong>/<span class="total-q-label">10</span> câu
+              </div>
             </div>
           </div>
 
-          <!-- Roster Layout -->
-          <div class="relative w-full max-w-[310px] flex items-center justify-between px-1 z-10">
-            
-            <!-- Blue Team (5 Players) -->
-            <div id="blue-team-sprites" class="flex items-end space-x-[-5px] mr-1">
-              <!-- Rendered by JS -->
+          <div class="timer-wrapper">
+            <div class="timer-counter" id="blue-timer-digits">
+              ⏱️ <span id="blue-countdown" style="color: var(--blue-light);">30s</span>
             </div>
-
-            <div class="w-5 shrink-0"></div>
-
-            <!-- Red Team (5 Players) -->
-            <div id="red-team-sprites" class="flex items-end space-x-[-5px] ml-1">
-              <!-- Rendered by JS -->
+            <div class="timer-bar-container">
+              <div id="blue-timer-bar" class="timer-bar-inner timer-bar-blue"></div>
             </div>
           </div>
-
         </div>
 
-        <!-- Advantage Bar at bottom of arena -->
-        <div class="absolute bottom-1 inset-x-4 z-20 flex flex-col items-center pointer-events-none">
-          <div class="w-full bg-slate-900/80 backdrop-blur-sm rounded-full p-0.5 border border-white/20">
-            <div class="relative h-2 w-full bg-slate-800 rounded-full overflow-hidden flex">
-              <div id="gauge-blue" class="h-full bg-blue-500 transition-all duration-300" style="width: 50%;"></div>
-              <div id="gauge-red" class="h-full bg-red-500 transition-all duration-300" style="width: 50%;"></div>
+        <div id="blue-roster-chips" class="roster-chip-box"></div>
+
+        <div class="question-box">
+          <div class="question-tags">
+            <span class="q-badge">CÂU HỎI <strong id="blue-q-current">1</strong>/<span class="total-q-label">10</span></span>
+            <span class="topic-badge">🌏 Địa lý</span>
+          </div>
+          <div id="blue-q-text" class="question-text">Đang chuẩn bị câu hỏi...</div>
+        </div>
+
+        <div id="blue-options-container" class="answers-grid"></div>
+      </section>
+
+      <!-- 2. SÂN KÉO CO NHỎ GỌN Ở GIỮA -->
+      <section class="center-column">
+        
+        <div class="arena-container" id="arena-stadium">
+          <div class="arena-sky-clouds">
+            <span>☁️</span>
+            <span>☀️</span>
+            <span>☁️</span>
+          </div>
+
+          <div class="arena-ground-strip">
+            <div class="center-chalk-line">
+              <div class="chalk-pin"></div>
+              <span class="chalk-label">0</span>
+            </div>
+
+            <div class="threshold-left">
+              <span class="threshold-tag tag-left">Xanh thắng</span>
+            </div>
+
+            <div class="threshold-right">
+              <span class="threshold-tag tag-right">Đỏ thắng</span>
             </div>
           </div>
-          <div class="flex justify-between w-full text-[8px] font-black text-slate-800 px-1 mt-0.5">
-            <span id="gauge-blue-text" class="text-blue-800">Xanh 50%</span>
-            <span id="gauge-red-text" class="text-red-800">Đỏ 50%</span>
-          </div>
-        </div>
-      </div>
 
-      <!-- 10 Question Progress Dots & Explanation Box -->
-      <div class="w-full bg-slate-900 border border-slate-800 rounded-2xl p-3 shadow-lg flex flex-col gap-2.5">
-        <!-- 10 Dots -->
-        <div class="flex items-center justify-between">
-          <span class="text-[11px] font-bold text-slate-400">10 Câu:</span>
-          <div id="dots-progress" class="flex items-center gap-1">
-            <!-- 1 to 10 dots -->
-          </div>
-        </div>
-
-        <!-- Rules quick notice -->
-        <div class="flex items-center justify-between text-[10px] font-bold">
-          <span class="text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800">✓ Đúng: Kéo 1 nhịp</span>
-          <span class="text-red-400 bg-red-950/60 px-1.5 py-0.5 rounded border border-red-800">✗ Sai: Đối thủ kéo 2 nhịp!</span>
-        </div>
-
-        <!-- Result / Explanation Card -->
-        <div id="result-card" class="hidden rounded-xl p-3 border transition-all text-xs">
-          <div id="result-badge" class="font-black text-sm mb-1 flex items-center gap-1.5">
-            <!-- Correct / Incorrect text -->
-          </div>
-          <p id="result-explanation" class="text-slate-300 leading-relaxed">
-            <!-- Geo educational info -->
-          </p>
-          <button id="btn-next-question" class="mt-2.5 w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2 rounded-xl text-xs flex items-center justify-center gap-1 shadow-md transition-all">
-            Tiếp tục câu tiếp theo ➔
-          </button>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- 3. CỘT PHẢI: BẢNG CÂU HỎI ĐỘI ĐỎ -->
-    <section id="red-panel" class="w-full bg-slate-900 border-2 border-red-500/50 rounded-2xl p-4 sm:p-5 shadow-2xl flex flex-col gap-4 relative overflow-hidden transition-all">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-red-600 flex items-center justify-center font-black text-white shadow-md">
-            Đ
-          </div>
-          <div>
-            <div class="text-sm font-black text-red-400 flex items-center gap-1.5">
-              ĐỘI ĐỎ
-              <span id="red-turn-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">CHỜ LƯỢT</span>
+          <div id="pull-stage-canvas" class="pull-stage-canvas">
+            <div class="rope-container">
+              <div class="rope-braid"></div>
+              <div class="rope-knot-flag">
+                <div class="knot-knot"></div>
+                <div class="knot-ribbon"></div>
+              </div>
             </div>
-            <div class="text-xs text-slate-400">Đúng: <span id="red-score" class="font-bold text-red-300">0</span>/10</div>
+
+            <div class="athletes-arena-row">
+              <div id="blue-squad-container" class="squad-group"></div>
+              <div style="width: 28px;"></div>
+              <div id="red-squad-container" class="squad-group"></div>
+            </div>
+          </div>
+
+          <div class="gauge-wrapper">
+            <div class="gauge-bar-track">
+              <div id="gauge-fill-blue" class="gauge-fill-blue" style="width: 50%;"></div>
+              <div id="gauge-fill-red" class="gauge-fill-red" style="width: 50%;"></div>
+            </div>
+            <div class="gauge-legend">
+              <span id="gauge-label-blue">Xanh 50%</span>
+              <span id="gauge-label-red">Đỏ 50%</span>
+            </div>
           </div>
         </div>
 
-        <!-- 30s Timer Display -->
-        <div class="flex flex-col items-end">
-          <div class="flex items-center gap-1 font-mono font-black text-base" id="red-timer-text">
-            ⏱️ <span id="red-countdown" class="text-slate-500">30s</span>
+        <div class="center-meta-card">
+          <div class="dots-container-row">
+            <span class="dots-label">Tiến trình:</span>
+            <div id="dots-stepper" class="dots-track"></div>
           </div>
-          <div class="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden mt-1">
-            <div id="red-timer-bar" class="h-full bg-red-500 w-full transition-all duration-300"></div>
+
+          <div class="rules-quick-summary">
+            <span class="rule-pill success">✓ Đúng: Kéo 1 nhịp (+15%)</span>
+            <span class="rule-pill danger">✗ Sai: Đối thủ kéo 2 nhịp (+30%)</span>
+          </div>
+
+          <div id="evaluation-card" class="eval-card" style="display: none;">
+            <div id="eval-header-text" class="eval-header"></div>
+            <div id="eval-details-text" style="font-weight: 700;"></div>
+            <div id="eval-explanation-text" class="eval-explanation"></div>
+            <button id="btn-next-step" class="next-btn">
+              Tiếp tục câu tiếp theo ➔
+            </button>
           </div>
         </div>
-      </div>
 
-      <!-- Red Roster 5 Players -->
-      <div class="flex items-center gap-1.5 flex-wrap bg-slate-950/60 p-2 rounded-xl border border-slate-800/80">
-        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">5 Thành viên:</span>
-        <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-md bg-red-950 text-red-300 border border-red-800">#1 Sơn</span>
-        <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-md bg-red-950 text-red-300 border border-red-800">#2 Hải</span>
-        <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-md bg-red-950 text-red-300 border border-red-800">#3 Đức</span>
-        <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-md bg-red-950 text-red-300 border border-red-800">#4 Cường</span>
-        <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-md bg-red-950 text-red-300 border border-red-800">#5 Long</span>
-      </div>
+      </section>
 
-      <!-- Question Card for Red -->
-      <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-4">
-        <div class="flex items-center justify-between text-xs text-slate-400 mb-2 font-bold">
-          <span>CÂU HỎI <span id="red-q-num">1</span>/10</span>
-          <span class="text-amber-400">Chủ đề Địa lý</span>
+      <!-- 3. BẢNG CÂU HỎI ĐỘI ĐỎ (BÊN PHẢI) -->
+      <section id="red-panel" class="quiz-panel inactive">
+        <div class="panel-head">
+          <div class="team-info">
+            <div class="team-icon red">Đ</div>
+            <div>
+              <div class="team-name-row red">
+                ĐỘI ĐỎ
+                <span id="red-status-pill" class="status-pill wait">CHỜ LƯỢT</span>
+              </div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                Đúng: <strong id="red-score-num" style="color: var(--red-light);">0</strong>/<span class="total-q-label">10</span> câu
+              </div>
+            </div>
+          </div>
+
+          <div class="timer-wrapper">
+            <div class="timer-counter" id="red-timer-digits">
+              ⏱️ <span id="red-countdown" style="color: var(--text-muted);">30s</span>
+            </div>
+            <div class="timer-bar-container">
+              <div id="red-timer-bar" class="timer-bar-inner timer-bar-red"></div>
+            </div>
+          </div>
         </div>
-        <p id="red-question-text" class="text-base sm:text-lg font-black text-slate-100 leading-snug min-h-[58px]">
-          Đang tải câu hỏi...
-        </p>
+
+        <div id="red-roster-chips" class="roster-chip-box"></div>
+
+        <div class="question-box">
+          <div class="question-tags">
+            <span class="q-badge">CÂU HỎI <strong id="red-q-current">1</strong>/<span class="total-q-label">10</span></span>
+            <span class="topic-badge">🌏 Địa lý</span>
+          </div>
+          <div id="red-q-text" class="question-text">Đang chuẩn bị câu hỏi...</div>
+        </div>
+
+        <div id="red-options-container" class="answers-grid"></div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- MODAL: VICTORY -->
+  <div id="victory-modal" class="modal-layer" style="display: none;">
+    <div class="modal-card">
+      <div class="trophy-container">🏆</div>
+      <div class="modal-header-text">
+        <h2 id="modal-winner-title" class="modal-title">ĐỘI XANH VÔ ĐỊCH!</h2>
+        <p id="modal-winner-sub" class="modal-sub">Trận đấu kéo co kịch tính đã kết thúc!</p>
       </div>
 
-      <!-- 4 Options A, B, C, D -->
-      <div id="red-options-container" class="grid grid-cols-1 gap-2.5">
-        <!-- Generated by JS -->
-      </div>
-    </section>
-
-  </main>
-
-  <!-- VICTORY MODAL -->
-  <div id="victory-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4 animate-in fade-in duration-300">
-    <div class="bg-slate-900 border-2 border-amber-500/80 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center flex flex-col items-center">
-      <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-500 to-yellow-300 text-slate-950 text-4xl flex items-center justify-center shadow-lg shadow-amber-500/30 mb-4 animate-bounce">
-        🏆
-      </div>
-      <h2 id="victory-title" class="text-2xl font-black text-amber-400 mb-1">
-        ĐỘI XANH CHIẾN THẮNG!
-      </h2>
-      <p id="victory-subtitle" class="text-xs text-slate-300 mb-4">
-        Trận kéo co kết thúc với chiến thắng thuyết phục!
-      </p>
-
-      <div class="w-full bg-slate-950/80 border border-slate-800 rounded-2xl p-4 mb-5 flex justify-around text-center">
+      <div class="score-recap-box">
         <div>
-          <div class="text-xs text-slate-400 font-bold">Đội Xanh</div>
-          <div id="final-blue-score" class="text-xl font-black text-blue-400">0</div>
+          <div class="recap-col-title">ĐỘI XANH</div>
+          <div id="final-score-blue" class="recap-col-score" style="color: var(--blue-light);">0/10</div>
         </div>
-        <div class="w-px bg-slate-800"></div>
+        <div class="recap-divider"></div>
         <div>
-          <div class="text-xs text-slate-400 font-bold">Đội Đỏ</div>
-          <div id="final-red-score" class="text-xl font-black text-red-400">0</div>
+          <div class="recap-col-title">ĐỘI ĐỎ</div>
+          <div id="final-score-red" class="recap-col-score" style="color: var(--red-light);">0/10</div>
         </div>
       </div>
 
-      <button id="btn-play-again" class="w-full bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black py-3 rounded-2xl shadow-lg transition-all text-sm flex items-center justify-center gap-2">
+      <button id="btn-modal-play-again" class="next-btn" style="padding: 14px; font-size: 14px;">
         🔄 Chơi ván mới ngay
       </button>
     </div>
   </div>
 
-  <!-- JAVASCRIPT GAME ENGINE -->
-  <script>
-    // --- 1. DATA: 10 CÂU HỎI ĐỊA LÝ & THÀNH VIÊN ---
-    const GEOGRAPHY_QUESTIONS = [
-      {
-        question: 'Đỉnh núi nào được mệnh danh là "Nóc nhà Đông Dương" nằm tại Việt Nam?',
-        options: ['Fansipan', 'Ngọc Linh', 'Bạch Mộc Lương Tử', 'Pu Si Lung'],
-        correctIndex: 0,
-        explanation: 'Đỉnh Fansipan cao 3.143m thuộc dãy Hoàng Liên Sơn, tỉnh Lào Cai, là đỉnh núi cao nhất 3 nước Đông Dương.'
-      },
-      {
-        question: 'Hang động tự nhiên lớn nhất thế giới Sơn Đoòng nằm ở tỉnh nào của Việt Nam?',
-        options: ['Ninh Bình', 'Quảng Bình', 'Hà Giang', 'Cao Bằng'],
-        correctIndex: 1,
-        explanation: 'Hang Sơn Đoòng thuộc Vườn quốc gia Phong Nha - Kẻ Bàng, tỉnh Quảng Bình, là hang động tự nhiên kỳ vĩ nhất thế giới.'
-      },
-      {
-        question: 'Dòng sông nào dài nhất thế giới, chảy qua phần lớn khu vực Đông Bắc châu Phi?',
-        options: ['Sông Amazon', 'Sông Nin (Nile)', 'Sông Mê Kông', 'Sông Dương Tử'],
-        correctIndex: 1,
-        explanation: 'Sông Nin dài khoảng 6.650 km, chảy qua 11 quốc gia châu Phi và đổ ra Địa Trung Hải.'
-      },
-      {
-        question: 'Đại dương nào có diện tích và độ sâu trung bình lớn nhất trên Trái Đất?',
-        options: ['Đại Tây Dương', 'Ấn Độ Dương', 'Bắc Băng Dương', 'Thái Bình Dương'],
-        correctIndex: 3,
-        explanation: 'Thái Bình Dương chiếm hơn 30% diện tích bề mặt Trái Đất và chứa rãnh Mariana sâu gần 11.000m.'
-      },
-      {
-        question: 'Đảo nào có diện tích tự nhiên lớn nhất tại Việt Nam?',
-        options: ['Đảo Phú Quốc', 'Đảo Cát Bà', 'Đảo Lý Sơn', 'Côn Đảo'],
-        correctIndex: 0,
-        explanation: 'Đảo Phú Quốc (Kiên Giang) có diện tích khoảng 589 km², là hòn đảo lớn nhất Việt Nam.'
-      },
-      {
-        question: 'Sa mạc cát nóng lớn nhất thế giới nằm ở châu lục nào?',
-        options: ['Châu Á (Gobi)', 'Châu Phi (Sahara)', 'Châu Úc', 'Châu Mỹ'],
-        correctIndex: 1,
-        explanation: 'Sa mạc Sahara nằm ở Bắc Phi có diện tích hơn 9 triệu km², gần bằng diện tích cả Hoa Kỳ.'
-      },
-      {
-        question: 'Dãy núi cao nhất hành tinh với đỉnh Everest (8.848m) có tên là gì?',
-        options: ['Dãy Andes', 'Dãy Alps', 'Dãy Himalaya', 'Dãy Rocky'],
-        correctIndex: 2,
-        explanation: 'Dãy Himalaya nằm giữa cao nguyên Tây Tạng và tiểu lục địa Ấn Độ, có đỉnh Everest cao nhất thế giới.'
-      },
-      {
-        question: 'Thác nước tự nhiên hùng vĩ nằm trên biên giới giữa Việt Nam và Trung Quốc là thác nào?',
-        options: ['Thác Cam Ly', 'Thác Bản Giốc', 'Thác Datanla', 'Thác Pongour'],
-        correctIndex: 1,
-        explanation: 'Thác Bản Giốc nằm tại huyện Trùng Khánh, tỉnh Cao Bằng, là một trong những thác biên giới đẹp nhất hành tinh.'
-      },
-      {
-        question: 'Rừng mưa nhiệt đới lớn nhất thế giới, được coi là "lá phổi xanh của Trái Đất" là gì?',
-        options: ['Rừng Cúc Phương', 'Rừng Taiga', 'Rừng Amazon', 'Rừng Đen'],
-        correctIndex: 2,
-        explanation: 'Rừng nhiệt đới Amazon trải rộng khắp Nam Mỹ, tạo ra lượng oxy và là nơi cư trú sinh thái khổng lồ.'
-      },
-      {
-        question: 'Hai quần đảo Hoàng Sa và Trường Sa là một phần máu thịt thiêng liêng thuộc chủ quyền của quốc gia nào?',
-        options: ['Việt Nam', 'Indonesia', 'Philippines', 'Malaysia'],
-        correctIndex: 0,
-        explanation: 'Việt Nam có đầy đủ bằng chứng lịch sử và căn cứ pháp lý khẳng định chủ quyền đối với Hoàng Sa và Trường Sa.'
-      }
-    ];
-
-    const BLUE_TEAM = [
-      { id: 1, name: 'Quá' },
-      { id: 2, name: 'Mập' },
-      { id: 3, name: 'Nhiên' },
-      { id: 4, name: 'Hạo' },
-      { id: 5, name: 'Lý' }
-    ];
-
-    const RED_TEAM = [
-      { id: 1, name: 'Sơn' },
-      { id: 2, name: 'Hải' },
-      { id: 3, name: 'Đức' },
-      { id: 4, name: 'Cường' },
-      { id: 5, name: 'Long' }
-    ];
-
-    // --- 2. GAME STATE ---
-    let currentQuestionIndex = 0;
-    let currentTeamTurn = 'blue'; // 'blue' or 'red'
-    let ropePosition = 0; // -100 (Blue wins) to +100 (Red wins)
-    let blueScore = 0;
-    let redScore = 0;
-    let countdown = 30;
-    let timerInterval = null;
-    let isEvaluating = false;
-    let isFinished = false;
-    let gameMode = 'bot'; // 'bot' or 'pvp'
-    let soundEnabled = true;
-    let questionHistory = []; // { isCorrect: boolean }
-
-    // Audio synthesizer using Web Audio API (Offline & Zero-dependency)
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    let audioCtx = null;
-    function playTone(freq, type = 'sine', duration = 0.2) {
-      if (!soundEnabled) return;
-      try {
-        if (!audioCtx) audioCtx = new AudioContext();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {}
-    }
-
-    function soundWhistle() {
-      playTone(900, 'triangle', 0.1);
-      setTimeout(() => playTone(1200, 'triangle', 0.3), 100);
-    }
-    function soundPull() {
-      playTone(180, 'sawtooth', 0.25);
-    }
-    function soundCorrect() {
-      playTone(523.25, 'sine', 0.15);
-      setTimeout(() => playTone(659.25, 'sine', 0.15), 100);
-      setTimeout(() => playTone(783.99, 'sine', 0.3), 200);
-    }
-    function soundWrong() {
-      playTone(220, 'sawtooth', 0.2);
-      setTimeout(() => playTone(174.6, 'sawtooth', 0.35), 180);
-    }
-    function soundVictory() {
-      [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
-        setTimeout(() => playTone(f, 'triangle', 0.4), i * 150);
-      });
-    }
-
-    // --- 3. CHARACTER SPRITE RENDERER ---
-    function renderSprites() {
-      const blueContainer = document.getElementById('blue-team-sprites');
-      const redContainer = document.getElementById('red-team-sprites');
-      
-      // Blue: Reverse so #5 (Anchor) is on far left, #1 (Lead) is closest to center
-      blueContainer.innerHTML = [...BLUE_TEAM].reverse().map(m => `
-        <div class="flex flex-col items-center select-none" style="width: 31px;">
-          <div class="text-[7.5px] font-extrabold px-1 py-0.2 rounded-full bg-blue-100 text-blue-900 border border-blue-300 whitespace-nowrap mb-0.5">
-            #${m.id} ${m.name}
-          </div>
-          <svg viewBox="0 0 40 60" class="w-7 h-10 filter drop-shadow">
-            <!-- Head -->
-            <circle cx="20" cy="14" r="8" fill="#3b82f6"/>
-            <circle cx="18" cy="13" r="1.5" fill="#fff"/>
-            <circle cx="22" cy="13" r="1.5" fill="#fff"/>
-            <!-- Body -->
-            <path d="M12 24 L28 24 L25 45 L15 45 Z" fill="#1d4ed8"/>
-            <!-- Arms pulling left -->
-            <path d="M14 28 L6 34 L12 36" stroke="#93c5fd" stroke-width="3" stroke-linecap="round" fill="none"/>
-            <!-- Legs -->
-            <path d="M16 45 L12 58 M24 45 L22 58" stroke="#1e3a8a" stroke-width="3.5" stroke-linecap="round"/>
-          </svg>
+  <!-- MODAL: QUẢN LÝ CÂU HỎI -->
+  <div id="questions-modal" class="modal-layer" style="display: none;">
+    <div class="modal-card wide-modal">
+      <div class="modal-header-row">
+        <div class="modal-title-text">
+          <span>📝</span> QUẢN LÝ NGÂN HÀNG CÂU HỎI ĐỊA LÝ
         </div>
-      `).join('');
+        <button id="btn-close-q-modal" class="modal-close-btn">✕ Đóng</button>
+      </div>
 
-      // Red: #1 (Lead) closest to center, #5 (Anchor) on far right
-      redContainer.innerHTML = RED_TEAM.map(m => `
-        <div class="flex flex-col items-center select-none" style="width: 31px;">
-          <div class="text-[7.5px] font-extrabold px-1 py-0.2 rounded-full bg-red-100 text-red-900 border border-red-300 whitespace-nowrap mb-0.5">
-            #${m.id} ${m.name}
-          </div>
-          <svg viewBox="0 0 40 60" class="w-7 h-10 filter drop-shadow">
-            <!-- Head -->
-            <circle cx="20" cy="14" r="8" fill="#ef4444"/>
-            <circle cx="18" cy="13" r="1.5" fill="#fff"/>
-            <circle cx="22" cy="13" r="1.5" fill="#fff"/>
-            <!-- Body -->
-            <path d="M12 24 L28 24 L25 45 L15 45 Z" fill="#b91c1c"/>
-            <!-- Arms pulling right -->
-            <path d="M26 28 L34 34 L28 36" stroke="#fca5a5" stroke-width="3" stroke-linecap="round" fill="none"/>
-            <!-- Legs -->
-            <path d="M16 45 L18 58 M24 45 L28 58" stroke="#7f1d1d" stroke-width="3.5" stroke-linecap="round"/>
-          </svg>
+      <div class="q-manager-toolbar">
+        <div style="font-size: 12px; font-weight: 700; color: #cbd5e1;">
+          Tổng số câu hỏi: <strong id="q-total-count-text" style="color: var(--gold-light);">10</strong>
         </div>
-      `).join('');
-    }
+        <div style="display: flex; gap: 8px;">
+          <button id="btn-open-add-q" class="action-btn btn-blue" style="padding: 6px 12px;">
+            ➕ Thêm câu hỏi mới
+          </button>
+          <button id="btn-reset-default-q" class="action-btn" style="padding: 6px 12px;">
+            🔄 Khôi phục 10 câu gốc
+          </button>
+        </div>
+      </div>
 
-    // --- 4. QUESTION & UI RENDER ---
-    function renderQuestion() {
-      const q = GEOGRAPHY_QUESTIONS[currentQuestionIndex];
-      const isBlue = currentTeamTurn === 'blue';
+      <div id="q-items-container" class="q-manager-list"></div>
+    </div>
+  </div>
 
-      // Update question text and numbers
-      document.getElementById('blue-q-num').innerText = currentQuestionIndex + 1;
-      document.getElementById('red-q-num').innerText = currentQuestionIndex + 1;
-      document.getElementById('blue-question-text').innerText = q.question;
-      document.getElementById('red-question-text').innerText = q.question;
+  <!-- MODAL: FORM CÂU HỎI -->
+  <div id="q-form-modal" class="modal-layer" style="display: none;">
+    <div class="modal-card" style="max-width: 580px;">
+      <div class="modal-header-row">
+        <div id="q-form-modal-title" class="modal-title-text">
+          <span>➕</span> Thêm câu hỏi mới
+        </div>
+        <button id="btn-close-form-modal" class="modal-close-btn">✕ Hủy</button>
+      </div>
 
-      // Update active turn badges and panel borders
-      const bluePanel = document.getElementById('blue-panel');
-      const redPanel = document.getElementById('red-panel');
-      const blueBadge = document.getElementById('blue-turn-badge');
-      const redBadge = document.getElementById('red-turn-badge');
+      <form id="form-question" style="display: flex; flex-direction: column; gap: 12px;">
+        <input type="hidden" id="form-q-id" value="">
 
-      if (isBlue) {
-        bluePanel.classList.add('border-blue-500', 'ring-2', 'ring-blue-500/40');
-        bluePanel.classList.remove('opacity-60');
-        blueBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500 text-white animate-pulse';
-        blueBadge.innerText = 'LƯỢT TRẢ LỜI';
+        <div class="form-group">
+          <label class="form-label" for="form-q-text">Nội dung câu hỏi: *</label>
+          <textarea id="form-q-text" class="form-textarea" placeholder="Nhập nội dung câu hỏi địa lý..." required></textarea>
+        </div>
 
-        redPanel.classList.remove('border-red-500', 'ring-2', 'ring-red-500/40');
-        redPanel.classList.add('opacity-60');
-        redBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700';
-        redBadge.innerText = gameMode === 'bot' ? 'CHỜ LƯỢT' : 'CHỜ LƯỢT';
-      } else {
-        redPanel.classList.add('border-red-500', 'ring-2', 'ring-red-500/40');
-        redPanel.classList.remove('opacity-60');
-        redBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500 text-white animate-pulse';
-        redBadge.innerText = gameMode === 'bot' ? 'MÁY SUY NGHĨ...' : 'LƯỢT TRẢ LỜI';
-
-        bluePanel.classList.remove('border-blue-500', 'ring-2', 'ring-blue-500/40');
-        bluePanel.classList.add('opacity-60');
-        blueBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700';
-        blueBadge.innerText = 'CHỜ LƯỢT';
-      }
-
-      // Render Options for Blue
-      const blueOptContainer = document.getElementById('blue-options-container');
-      blueOptContainer.innerHTML = q.options.map((opt, idx) => `
-        <button onclick="handleAnswer('blue', ${idx})" ${!isBlue || isEvaluating ? 'disabled' : ''} class="w-full text-left p-3 rounded-xl border transition-all flex items-center gap-3 font-semibold text-xs sm:text-sm ${
-          isBlue && !isEvaluating
-            ? 'bg-slate-800/90 hover:bg-blue-600/20 border-slate-700 hover:border-blue-400 text-slate-200 cursor-pointer active:scale-98'
-            : 'bg-slate-900/50 border-slate-800 text-slate-500 cursor-not-allowed'
-        }">
-          <span class="w-6 h-6 rounded-lg bg-blue-950 text-blue-400 border border-blue-800 font-black text-xs flex items-center justify-center shrink-0">
-            ${['A','B','C','D'][idx]}
-          </span>
-          <span class="flex-1">${opt}</span>
-        </button>
-      `).join('');
-
-      // Render Options for Red
-      const redOptContainer = document.getElementById('red-options-container');
-      redOptContainer.innerHTML = q.options.map((opt, idx) => `
-        <button onclick="handleAnswer('red', ${idx})" ${isBlue || isEvaluating || (gameMode === 'bot') ? 'disabled' : ''} class="w-full text-left p-3 rounded-xl border transition-all flex items-center gap-3 font-semibold text-xs sm:text-sm ${
-          !isBlue && !isEvaluating && gameMode !== 'bot'
-            ? 'bg-slate-800/90 hover:bg-red-600/20 border-slate-700 hover:border-red-400 text-slate-200 cursor-pointer active:scale-98'
-            : 'bg-slate-900/50 border-slate-800 text-slate-500 cursor-not-allowed'
-        }">
-          <span class="w-6 h-6 rounded-lg bg-red-950 text-red-400 border border-red-800 font-black text-xs flex items-center justify-center shrink-0">
-            ${['A','B','C','D'][idx]}
-          </span>
-          <span class="flex-1">${opt}</span>
-        </button>
-      `).join('');
-
-      // Render 10 Progress Dots
-      renderDots();
-
-      // Start 30s Countdown
-      resetTimer();
-
-      // If Bot turn, trigger AI choice after 1.5s
-      if (!isBlue && gameMode === 'bot' && !isEvaluating && !isFinished) {
-        setTimeout(() => {
-          if (currentTeamTurn === 'red' && !isEvaluating && !isFinished) {
-            // Bot AI 70% accuracy
-            const willBeCorrect = Math.random() < 0.7;
-            const botChoice = willBeCorrect 
-              ? q.correctIndex 
-              : (q.correctIndex + 1 + Math.floor(Math.random() * 3)) % 4;
-            handleAnswer('red', botChoice);
-          }
-        }, 1600);
-      }
-    }
-
-    function renderDots() {
-      const container = document.getElementById('dots-progress');
-      container.innerHTML = Array.from({ length: 10 }).map((_, i) => {
-        const h = questionHistory[i];
-        let cls = 'bg-slate-800 border-slate-700 text-slate-500';
-        if (h) {
-          cls = h.isCorrect ? 'bg-emerald-500 border-emerald-400 text-white' : 'bg-red-500 border-red-400 text-white';
-        } else if (i === currentQuestionIndex) {
-          cls = currentTeamTurn === 'blue' ? 'bg-blue-500 border-white text-white scale-110' : 'bg-red-500 border-white text-white scale-110';
-        }
-        return `
-          <div class="w-5 h-5 rounded-md text-[10px] font-extrabold flex items-center justify-center border ${cls}">
-            ${i + 1}
+        <div class="form-group">
+          <label class="form-label">4 Phương án trả lời (A, B, C, D): *</label>
+          <div class="options-form-grid">
+            <div class="opt-input-wrapper">
+              <span class="opt-key-badge">A</span>
+              <input type="text" id="form-opt-0" class="form-input" placeholder="Phương án A..." required>
+            </div>
+            <div class="opt-input-wrapper">
+              <span class="opt-key-badge">B</span>
+              <input type="text" id="form-opt-1" class="form-input" placeholder="Phương án B..." required>
+            </div>
+            <div class="opt-input-wrapper">
+              <span class="opt-key-badge">C</span>
+              <input type="text" id="form-opt-2" class="form-input" placeholder="Phương án C..." required>
+            </div>
+            <div class="opt-input-wrapper">
+              <span class="opt-key-badge">D</span>
+              <input type="text" id="form-opt-3" class="form-input" placeholder="Phương án D..." required>
+            </div>
           </div>
-        `;
-      }).join('');
-    }
+        </div>
 
-    // --- 5. 30s TIMER ENGINE ---
-    function resetTimer() {
-      clearInterval(timerInterval);
-      countdown = 30;
-      updateTimerUI();
+        <div class="form-group">
+          <label class="form-label" for="form-q-correct">Chọn đáp án đúng: *</label>
+          <select id="form-q-correct" class="form-select">
+            <option value="0">Phương án A</option>
+            <option value="1">Phương án B</option>
+            <option value="2">Phương án C</option>
+            <option value="3">Phương án D</option>
+          </select>
+        </div>
 
-      timerInterval = setInterval(() => {
-        if (isEvaluating || isFinished) return;
-        countdown--;
-        updateTimerUI();
+        <div class="form-group">
+          <label class="form-label" for="form-q-explanation">Kiến thức / Giải thích chi tiết:</label>
+          <textarea id="form-q-explanation" class="form-textarea" placeholder="Nhập thông tin giải thích sau khi người chơi trả lời..."></textarea>
+        </div>
 
-        if (countdown <= 5 && countdown > 0) {
-          playTone(440, 'sine', 0.05); // Ticking sound
-        }
+        <div class="form-actions-row">
+          <button type="button" id="btn-cancel-form" class="action-btn">Hủy bỏ</button>
+          <button type="submit" class="action-btn btn-blue">💾 Lưu câu hỏi</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-        if (countdown <= 0) {
-          clearInterval(timerInterval);
-          // Time expired -> count as wrong answer!
-          handleAnswer(currentTeamTurn, -1);
-        }
-      }, 1000);
-    }
+  <!-- MODAL: RULES -->
+  <div id="rules-modal" class="modal-layer" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header-row">
+        <div class="modal-title-text" style="color: #fbbf24;">
+          <span>📖</span> LUẬT CHƠI KÉO CO ĐỊA LÝ 5v5
+        </div>
+        <button id="btn-close-rules" class="modal-close-btn">✕</button>
+      </div>
 
-    function updateTimerUI() {
-      const isBlue = currentTeamTurn === 'blue';
-      const pct = (countdown / 30) * 100;
-      
-      const blueCount = document.getElementById('blue-countdown');
-      const blueBar = document.getElementById('blue-timer-bar');
-      const redCount = document.getElementById('red-countdown');
-      const redBar = document.getElementById('red-timer-bar');
+      <div style="font-size: 13px; line-height: 1.6; color: #cbd5e1; display: flex; flex-direction: column; gap: 10px;">
+        <p>🚩 <strong>Đội hình:</strong> Mỗi đội gồm <strong>5 thành viên</strong>.</p>
+        <p>🎯 <strong>Cơ chế kéo dây:</strong></p>
+        <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 6px;">
+          <li><span style="color: #34d399;">✓ Trả lời Đúng:</span> Đội của mình kéo dây <strong>1 nhịp (+15%)</strong>.</li>
+          <li><span style="color: #f87171;">✗ Trả lời Sai:</span> Đội đối phương được kéo <strong>2 nhịp (+30%)</strong>!</li>
+        </ul>
+        <p>⏱️ <strong>Thời gian:</strong> Có thể tùy chọn <strong>30 giây, 60 giây hoặc 90 giây</strong>.</p>
+        <p>📝 <strong>Quản lý câu hỏi:</strong> Tự do thêm câu hỏi mới, sửa hoặc xóa câu hỏi hiện có.</p>
+      </div>
+    </div>
+  </div>
 
-      if (isBlue) {
-        blueCount.innerText = `${countdown}s`;
-        blueBar.style.width = `${pct}%`;
-        blueBar.className = countdown <= 5 ? 'h-full bg-red-500 animate-pulse' : 'h-full bg-blue-500';
-        redCount.innerText = '30s';
-        redBar.style.width = '100%';
-      } else {
-        redCount.innerText = `${countdown}s`;
-        redBar.style.width = `${pct}%`;
-        redBar.className = countdown <= 5 ? 'h-full bg-red-500 animate-pulse' : 'h-full bg-red-500';
-        blueCount.innerText = '30s';
-        blueBar.style.width = '100%';
-      }
-    }
+  <!-- MODAL: ROSTERS -->
+  <div id="roster-modal" class="modal-layer" style="display: none;">
+    <div class="modal-card" style="max-width: 540px;">
+      <div class="modal-header-row">
+        <div class="modal-title-text" style="color: #60a5fa;">
+          <span>👥</span> DANH SÁCH 10 VẬN ĐỘNG VIÊN
+        </div>
+        <button id="btn-close-roster" class="modal-close-btn">✕</button>
+      </div>
 
-    // --- 6. ANSWER HANDLING & TUG MECHANICS ---
-    window.handleAnswer = function(team, chosenIdx) {
-      if (isEvaluating || isFinished || team !== currentTeamTurn) return;
-      isEvaluating = true;
-      clearInterval(timerInterval);
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+        <div style="background: rgba(30, 58, 138, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); border-radius: 12px; padding: 12px;">
+          <h4 style="color: #93c5fd; font-weight: 900; font-size: 13px; margin-bottom: 8px;">ĐỘI XANH</h4>
+          <ul style="list-style: none; font-size: 12px; display: flex; flex-direction: column; gap: 6px;">
+            <li><strong>#1 Quá</strong> - Tiên phong</li>
+            <li><strong>#2 Mập</strong> - Lực sĩ</li>
+            <li><strong>#3 Nhiên</strong> - Kỹ thuật</li>
+            <li><strong>#4 Hạo</strong> - Tiếp sức</li>
+            <li><strong>#5 Lý</strong> - Mỏ neo</li>
+          </ul>
+        </div>
 
-      const q = GEOGRAPHY_QUESTIONS[currentQuestionIndex];
-      const isCorrect = chosenIdx === q.correctIndex;
-      let pulledTeam = team;
-      let strokeCount = 1;
+        <div style="background: rgba(127, 29, 29, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 12px;">
+          <h4 style="color: #fca5a5; font-weight: 900; font-size: 13px; margin-bottom: 8px;">ĐỘI ĐỎ</h4>
+          <ul style="list-style: none; font-size: 12px; display: flex; flex-direction: column; gap: 6px;">
+            <li><strong>#1 Sơn</strong> - Tiên phong</li>
+            <li><strong>#2 Hải</strong> - Lực sĩ</li>
+            <li><strong>#3 Đức</strong> - Kỹ thuật</li>
+            <li><strong>#4 Cường</strong> - Tiếp sức</li>
+            <li><strong>#5 Long</strong> - Mỏ neo</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
 
-      if (isCorrect) {
-        // Đúng -> Kéo 1 nhịp (+15%)
-        pulledTeam = team;
-        strokeCount = 1;
-        soundCorrect();
-        if (team === 'blue') blueScore++; else redScore++;
-      } else {
-        // Sai -> Đội đối diện kéo 2 nhịp (+30%)!
-        pulledTeam = team === 'blue' ? 'red' : 'blue';
-        strokeCount = 2;
-        soundWrong();
-      }
-
-      // Record History
-      questionHistory[currentQuestionIndex] = { isCorrect, team };
-
-      // Apply Rope Pull Movement (-15 per stroke for blue, +15 per stroke for red)
-      const delta = (pulledTeam === 'blue' ? -15 : 15) * strokeCount;
-      ropePosition = Math.max(-100, Math.min(100, ropePosition + delta));
-      updateArenaUI();
-
-      // Play rope pull sound
-      setTimeout(soundPull, 200);
-
-      // Show Result Card in center
-      showResultCard(isCorrect, pulledTeam, strokeCount, q);
-
-      // Check win condition (-100 or +100 or 10 questions done)
-      if (ropePosition <= -100 || ropePosition >= 100 || currentQuestionIndex === 9) {
-        setTimeout(checkMatchVictory, 1500);
-      }
-    };
-
-    function updateArenaUI() {
-      // Shift characters & rope: max 50px offset
-      const maxShiftPx = 50;
-      const px = (ropePosition / 100) * maxShiftPx;
-      document.getElementById('dynamic-pull-stage').style.transform = `translateX(${px}px)`;
-
-      // Update Advantage Gauge
-      // 0 = 50-50, -100 = 100% blue, +100 = 100% red
-      const bluePct = Math.round(50 - (ropePosition / 2));
-      const redPct = 100 - bluePct;
-      document.getElementById('gauge-blue').style.width = `${bluePct}%`;
-      document.getElementById('gauge-red').style.width = `${redPct}%`;
-      document.getElementById('gauge-blue-text').innerText = `Xanh ${bluePct}%`;
-      document.getElementById('gauge-red-text').innerText = `Đỏ ${redPct}%`;
-
-      // Update scores
-      document.getElementById('blue-score').innerText = blueScore;
-      document.getElementById('red-score').innerText = redScore;
-    }
-
-    function showResultCard(isCorrect, pulledTeam, strokeCount, q) {
-      const card = document.getElementById('result-card');
-      const badge = document.getElementById('result-badge');
-      const expl = document.getElementById('result-explanation');
-
-      card.classList.remove('hidden');
-      if (isCorrect) {
-        card.className = 'rounded-xl p-3 border transition-all text-xs bg-emerald-950/80 border-emerald-500 text-emerald-100';
-        badge.innerHTML = `✅ TRẢ LỜI ĐÚNG! <span class="text-xs text-emerald-300 font-bold ml-1">Đội ${pulledTeam === 'blue' ? 'Xanh' : 'Đỏ'} kéo 1 nhịp</span>`;
-      } else {
-        card.className = 'rounded-xl p-3 border transition-all text-xs bg-red-950/80 border-red-500 text-red-100';
-        badge.innerHTML = `❌ TRẢ LỜI CHƯA ĐÚNG! <span class="text-xs text-red-300 font-bold ml-1">Đội ${pulledTeam === 'blue' ? 'Xanh' : 'Đỏ'} kéo 2 nhịp!</span>`;
-      }
-
-      expl.innerHTML = `<strong>Đáp án đúng:</strong> ${q.options[q.correctIndex]}<br><span class="text-slate-300 mt-1 inline-block">${q.explanation}</span>`;
-    }
-
-    // Next Question Button
-    document.getElementById('btn-next-question').addEventListener('click', () => {
-      if (isFinished) return;
-      document.getElementById('result-card').classList.add('hidden');
-      isEvaluating = false;
-
-      if (currentQuestionIndex < 9) {
-        currentQuestionIndex++;
-        // Switch turn between teams
-        currentTeamTurn = currentTeamTurn === 'blue' ? 'red' : 'blue';
-        renderQuestion();
-      } else {
-        checkMatchVictory();
-      }
-    });
-
-    // Victory Check
-    function checkMatchVictory() {
-      isFinished = true;
-      clearInterval(timerInterval);
-      soundVictory();
-
-      let winner = 'draw';
-      if (ropePosition <= -100) winner = 'blue';
-      else if (ropePosition >= 100) winner = 'red';
-      else if (ropePosition < 0) winner = 'blue';
-      else if (ropePosition > 0) winner = 'red';
-
-      const modal = document.getElementById('victory-modal');
-      const title = document.getElementById('victory-title');
-      const sub = document.getElementById('victory-subtitle');
-
-      modal.classList.remove('hidden');
-      if (winner === 'blue') {
-        title.innerText = '🏆 ĐỘI XANH VÔ ĐỊCH!';
-        title.className = 'text-2xl font-black text-blue-400 mb-1';
-        sub.innerText = 'Chúc mừng Quá, Mập, Nhiên, Hạo và Lý đã xuất sắc chiến thắng!';
-      } else if (winner === 'red') {
-        title.innerText = '🏆 ĐỘI ĐỎ VÔ ĐỊCH!';
-        title.className = 'text-2xl font-black text-red-400 mb-1';
-        sub.innerText = 'Chúc mừng Sơn, Hải, Đức, Cường và Long đã xuất sắc chiến thắng!';
-      } else {
-        title.innerText = '🤝 KẾT QUẢ HÒA!';
-        title.className = 'text-2xl font-black text-amber-400 mb-1';
-        sub.innerText = 'Cả hai đội đều có sức mạnh và kiến thức địa lý ngang tài ngang sức!';
-      }
-
-      document.getElementById('final-blue-score').innerText = `${blueScore}/10`;
-      document.getElementById('final-red-score').innerText = `${redScore}/10`;
-    }
-
-    // Restart Game
-    function restartGame() {
-      currentQuestionIndex = 0;
-      currentTeamTurn = 'blue';
-      ropePosition = 0;
-      blueScore = 0;
-      redScore = 0;
-      isEvaluating = false;
-      isFinished = false;
-      questionHistory = [];
-      document.getElementById('result-card').classList.add('hidden');
-      document.getElementById('victory-modal').classList.add('hidden');
-      updateArenaUI();
-      soundWhistle();
-      renderQuestion();
-    }
-
-    document.getElementById('btn-restart-match').addEventListener('click', restartGame);
-    document.getElementById('btn-play-again').addEventListener('click', restartGame);
-
-    // Mode Toggle
-    document.getElementById('game-mode-select').addEventListener('change', (e) => {
-      gameMode = e.target.value;
-      restartGame();
-    });
-
-    // Sound Toggle
-    document.getElementById('btn-sound-toggle').addEventListener('click', () => {
-      soundEnabled = !soundEnabled;
-      document.getElementById('sound-label').innerText = soundEnabled ? 'Bật' : 'Tắt';
-    });
-
-    // Download Single-File HTML Button
-    document.getElementById('btn-download-html').addEventListener('click', () => {
-      const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'tro-choi-keo-co-dia-ly.html';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
-
-    // INITIAL BOOT
-    renderSprites();
-    renderQuestion();
-    updateArenaUI();
-  </script>
+  <script type="module" src="./main.js"></script>
 </body>
 </html>

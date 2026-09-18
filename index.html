@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trò Chơi Kéo Co Địa Lý 5v5</title>
-  <meta name="description" content="Trò chơi kéo co đối kháng 5v5 giữa Đội Xanh và Đội Đỏ, tích hợp 10 câu hỏi Địa lý: trả lời đúng kéo 1 nhịp, trả lời sai đối thủ kéo 2 nhịp." />
+  <meta name="description" content="Trò chơi kéo co đối kháng 5v5 giữa Đội Xanh và Đội Đỏ, tích hợp câu hỏi Địa lý: trả lời đúng kéo 1 nhịp, trả lời sai đối thủ kéo 2 nhịp. Hỗ trợ tùy chỉnh câu hỏi và thời gian." />
   <meta property="og:title" content="Trò Chơi Kéo Co Địa Lý 5v5" />
-  <meta property="og:description" content="Trò chơi kéo co đối kháng 5v5 giữa Đội Xanh và Đội Đỏ, tích hợp 10 câu hỏi Địa lý: trả lời đúng kéo 1 nhịp, trả lời sai đối thủ kéo 2 nhịp." />
+  <meta property="og:description" content="Trò chơi kéo co đối kháng 5v5 giữa Đội Xanh và Đội Đỏ, tích hợp câu hỏi Địa lý: trả lời đúng kéo 1 nhịp, trả lời sai đối thủ kéo 2 nhịp. Hỗ trợ tùy chỉnh câu hỏi và thời gian." />
   <meta property="og:type" content="website" />
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
@@ -21,35 +21,56 @@
         <div>
           <div class="brand-title">
             TRÒ CHƠI KÉO CO ĐỊA LÝ 5v5
-            <span class="brand-badge">10 Câu Hỏi</span>
+            <span class="brand-badge" id="header-q-badge">10 Câu Hỏi</span>
           </div>
-          <div class="brand-sub">Đúng kéo 1 nhịp (+15%) • Sai đối thủ kéo 2 nhịp (+30%) • 30s/câu</div>
+          <div class="brand-sub">Đúng kéo 1 nhịp (+15%) • Sai đối thủ kéo 2 nhịp (+30%) • Đổi lượt luân phiên</div>
         </div>
       </div>
 
       <div class="header-toolbar">
+        <!-- Chế độ chơi -->
         <select id="select-game-mode" class="action-select" title="Chọn chế độ chơi">
           <option value="bot">🤖 Đấu với Máy (AI)</option>
           <option value="pvp">👥 2 Người chơi (PvP)</option>
         </select>
 
+        <!-- Thời gian mỗi lượt 30s, 60s, 90s -->
+        <div class="toolbar-group" title="Thời gian trả lời mỗi câu">
+          <span class="toolbar-label">⏱️</span>
+          <select id="select-turn-time" class="action-select" title="Chọn thời gian trả lời">
+            <option value="30">30 giây</option>
+            <option value="60">60 giây</option>
+            <option value="90">90 giây</option>
+          </select>
+        </div>
+
+        <!-- Quản lý câu hỏi (Thêm/Sửa/Xóa) -->
+        <button id="btn-manage-questions" class="action-btn btn-gold" title="Thêm, sửa, xóa danh sách câu hỏi">
+          📝 Quản lý câu hỏi <span id="q-count-badge" class="badge-count">10</span>
+        </button>
+
+        <!-- Âm thanh -->
         <button id="btn-toggle-sound" class="action-btn" title="Bật/Tắt âm thanh">
           🔊 <span id="sound-status-text">Bật</span>
         </button>
 
+        <!-- Luật chơi -->
         <button id="btn-show-rules" class="action-btn" title="Xem luật chơi">
           📖 Luật chơi
         </button>
 
+        <!-- Đội hình -->
         <button id="btn-show-roster" class="action-btn" title="Xem danh sách 10 vận động viên">
           👥 Đội hình
         </button>
 
+        <!-- Ván mới -->
         <button id="btn-reset-game" class="action-btn btn-blue" title="Bắt đầu ván mới">
           🔄 Ván mới
         </button>
 
-        <a href="/game_keo_co.html" download="tro-choi-keo-co-dia-ly.html" class="action-btn btn-green" title="Tải file HTML duy nhất để chạy offline không cần mạng">
+        <!-- Tải file HTML duy nhất offline -->
+        <a href="./game_keo_co.html" download="tro-choi-keo-co-dia-ly.html" class="action-btn btn-green" title="Tải file HTML duy nhất để chạy offline không cần mạng">
           📥 Tải .HTML
         </a>
       </div>
@@ -69,7 +90,7 @@
                 <span id="blue-status-pill" class="status-pill active-blue">LƯỢT TRẢ LỜI</span>
               </div>
               <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
-                Đúng: <strong id="blue-score-num" style="color: var(--blue-light);">0</strong>/10 câu
+                Đúng: <strong id="blue-score-num" style="color: var(--blue-light);">0</strong>/<span class="total-q-label">10</span> câu
               </div>
             </div>
           </div>
@@ -90,7 +111,7 @@
         <!-- Khung hiển thị câu hỏi -->
         <div class="question-box">
           <div class="question-tags">
-            <span class="q-badge">CÂU HỎI <strong id="blue-q-current">1</strong>/10</span>
+            <span class="q-badge">CÂU HỎI <strong id="blue-q-current">1</strong>/<span class="total-q-label">10</span></span>
             <span class="topic-badge">🌏 Địa lý</span>
           </div>
           <div id="blue-q-text" class="question-text">Đang chuẩn bị câu hỏi...</div>
@@ -200,7 +221,7 @@
                 <span id="red-status-pill" class="status-pill wait">CHỜ LƯỢT</span>
               </div>
               <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
-                Đúng: <strong id="red-score-num" style="color: var(--red-light);">0</strong>/10 câu
+                Đúng: <strong id="red-score-num" style="color: var(--red-light);">0</strong>/<span class="total-q-label">10</span> câu
               </div>
             </div>
           </div>
@@ -221,7 +242,7 @@
         <!-- Khung hiển thị câu hỏi -->
         <div class="question-box">
           <div class="question-tags">
-            <span class="q-badge">CÂU HỎI <strong id="red-q-current">1</strong>/10</span>
+            <span class="q-badge">CÂU HỎI <strong id="red-q-current">1</strong>/<span class="total-q-label">10</span></span>
             <span class="topic-badge">🌏 Địa lý</span>
           </div>
           <div id="red-q-text" class="question-text">Đang chuẩn bị câu hỏi...</div>
@@ -262,12 +283,106 @@
     </div>
   </div>
 
+  <!-- MODAL: QUẢN LÝ CÂU HỎI (THÊM / SỬA / XÓA) -->
+  <div id="questions-modal" class="modal-layer" style="display: none;">
+    <div class="modal-card wide-modal">
+      <div class="modal-header-row">
+        <div class="modal-title-text">
+          <span>📝</span> QUẢN LÝ NGÂN HÀNG CÂU HỎI ĐỊA LÝ
+        </div>
+        <button id="btn-close-q-modal" class="modal-close-btn">✕ Đóng</button>
+      </div>
+
+      <div class="q-manager-toolbar">
+        <div style="font-size: 12px; font-weight: 700; color: #cbd5e1;">
+          Tổng số câu hỏi: <strong id="q-total-count-text" style="color: var(--gold-light);">10</strong>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button id="btn-open-add-q" class="action-btn btn-blue" style="padding: 6px 12px;">
+            ➕ Thêm câu hỏi mới
+          </button>
+          <button id="btn-reset-default-q" class="action-btn" style="padding: 6px 12px;" title="Khôi phục lại 10 câu hỏi mặc định">
+            🔄 Khôi phục 10 câu gốc
+          </button>
+        </div>
+      </div>
+
+      <!-- Danh sách câu hỏi cuộn được -->
+      <div id="q-items-container" class="q-manager-list"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: FORM THÊM / SỬA CÂU HỎI -->
+  <div id="q-form-modal" class="modal-layer" style="display: none;">
+    <div class="modal-card" style="max-width: 580px;">
+      <div class="modal-header-row">
+        <div id="q-form-modal-title" class="modal-title-text">
+          <span>➕</span> Thêm câu hỏi mới
+        </div>
+        <button id="btn-close-form-modal" class="modal-close-btn">✕ Hủy</button>
+      </div>
+
+      <form id="form-question" style="display: flex; flex-direction: column; gap: 12px;">
+        <input type="hidden" id="form-q-id" value="">
+
+        <div class="form-group">
+          <label class="form-label" for="form-q-text">Nội dung câu hỏi: *</label>
+          <textarea id="form-q-text" class="form-textarea" placeholder="Nhập nội dung câu hỏi địa lý..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">4 Phương án trả lời (A, B, C, D): *</label>
+          <div class="options-form-grid">
+            <div class="opt-input-wrapper">
+              <span class="opt-key-badge">A</span>
+              <input type="text" id="form-opt-0" class="form-input" placeholder="Phương án A..." required>
+            </div>
+            <div class="opt-input-wrapper">
+              <span class="opt-key-badge">B</span>
+              <input type="text" id="form-opt-1" class="form-input" placeholder="Phương án B..." required>
+            </div>
+            <div class="opt-input-wrapper">
+              <span class="opt-key-badge">C</span>
+              <input type="text" id="form-opt-2" class="form-input" placeholder="Phương án C..." required>
+            </div>
+            <div class="opt-input-wrapper">
+              <span class="opt-key-badge">D</span>
+              <input type="text" id="form-opt-3" class="form-input" placeholder="Phương án D..." required>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="form-q-correct">Chọn đáp án đúng: *</label>
+          <select id="form-q-correct" class="form-select">
+            <option value="0">Phương án A</option>
+            <option value="1">Phương án B</option>
+            <option value="2">Phương án C</option>
+            <option value="3">Phương án D</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="form-q-explanation">Kiến thức / Giải thích chi tiết:</label>
+          <textarea id="form-q-explanation" class="form-textarea" placeholder="Nhập thông tin giải thích sau khi người chơi trả lời..."></textarea>
+        </div>
+
+        <div class="form-actions-row">
+          <button type="button" id="btn-cancel-form" class="action-btn">Hủy bỏ</button>
+          <button type="submit" class="action-btn btn-blue">💾 Lưu câu hỏi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL: RULES -->
   <div id="rules-modal" class="modal-layer" style="display: none;">
     <div class="modal-card">
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-        <h3 style="font-size: 16px; font-weight: 900; color: #fbbf24;">📖 LUẬT CHƠI KÉO CO ĐỊA LÝ 5v5</h3>
-        <button id="btn-close-rules" class="modal-close-btn" style="padding: 4px 10px;">✕</button>
+      <div class="modal-header-row">
+        <div class="modal-title-text" style="color: #fbbf24;">
+          <span>📖</span> LUẬT CHƠI KÉO CO ĐỊA LÝ 5v5
+        </div>
+        <button id="btn-close-rules" class="modal-close-btn">✕</button>
       </div>
 
       <div style="font-size: 13px; line-height: 1.6; color: #cbd5e1; display: flex; flex-direction: column; gap: 10px;">
@@ -277,8 +392,9 @@
           <li><span style="color: #34d399;">✓ Trả lời Đúng:</span> Đội của mình kéo dây <strong>1 nhịp (+15%)</strong> về phía sân mình.</li>
           <li><span style="color: #f87171;">✗ Trả lời Sai:</span> Đội đối phương được kéo <strong>2 nhịp (+30%)</strong> về phía họ!</li>
         </ul>
-        <p>⏱️ <strong>Thời gian:</strong> Mỗi câu hỏi có <strong>30 giây</strong> suy nghĩ. Hết giờ tính là trả lời sai.</p>
-        <p>🏆 <strong>Chiến thắng:</strong> Kéo mốc cờ đỏ chạm vạch chiến thắng của đội mình, hoặc có lợi thế lớn hơn sau khi hoàn thành cả 10 câu hỏi!</p>
+        <p>⏱️ <strong>Thời gian linh hoạt:</strong> Tùy chọn <strong>30 giây, 60 giây hoặc 90 giây</strong> cho mỗi câu hỏi. Hết giờ tính là trả lời sai.</p>
+        <p>📝 <strong>Ngân hàng câu hỏi:</strong> Bạn có thể nhấn <em>Quản lý câu hỏi</em> để thêm, sửa nội dung hoặc xóa bớt câu hỏi theo ý muốn.</p>
+        <p>🏆 <strong>Chiến thắng:</strong> Kéo mốc cờ đỏ chạm vạch chiến thắng của đội mình, hoặc có lợi thế lớn hơn sau khi hoàn thành toàn bộ câu hỏi!</p>
       </div>
     </div>
   </div>
@@ -286,9 +402,11 @@
   <!-- MODAL: ROSTERS -->
   <div id="roster-modal" class="modal-layer" style="display: none;">
     <div class="modal-card" style="max-width: 540px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-        <h3 style="font-size: 16px; font-weight: 900; color: #60a5fa;">👥 DANH SÁCH 10 VẬN ĐỘNG VIÊN</h3>
-        <button id="btn-close-roster" class="modal-close-btn" style="padding: 4px 10px;">✕</button>
+      <div class="modal-header-row">
+        <div class="modal-title-text" style="color: #60a5fa;">
+          <span>👥</span> DANH SÁCH 10 VẬN ĐỘNG VIÊN
+        </div>
+        <button id="btn-close-roster" class="modal-close-btn">✕</button>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
@@ -317,7 +435,7 @@
     </div>
   </div>
 
-  <!-- SCRIPT -->
-  <script type="module" src="/main.js"></script>
+  <!-- SCRIPT RELATIVE PATH FOR GITHUB PAGES -->
+  <script type="module" src="./main.js"></script>
 </body>
 </html>

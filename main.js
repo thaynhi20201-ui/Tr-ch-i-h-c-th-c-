@@ -1,13 +1,13 @@
 /**
  * TRÒ CHƠI KÉO CO ĐỊA LÝ 5v5
  * 100% Pure Vanilla JavaScript Game Logic
- * No Frameworks, No Dependencies
+ * GitHub Pages Compatible & Fully Offline Ready
  */
 
 // =============================================================================
-// 1. DATA: 10 CÂU HỎI ĐỊA LÝ CHỌN LỌC (VIỆT NAM & THẾ GIỚI)
+// 1. DỮ LIỆU CÂU HỎI MẶC ĐỊNH BAN ĐẦU (10 CÂU HỎI ĐỊA LÝ VIỆT NAM & THẾ GIỚI)
 // =============================================================================
-const GEOGRAPHY_QUESTIONS = [
+const DEFAULT_GEOGRAPHY_QUESTIONS = [
   {
     id: 1,
     question: 'Đỉnh núi nào được mệnh danh là "Nóc nhà Đông Dương" nằm tại Việt Nam?',
@@ -100,13 +100,62 @@ const RED_TEAM = [
 ];
 
 // =============================================================================
-// 3. GAME STATE
+// 3. QUẢN LÝ LƯU TRỮ CÂU HỎI (LOCALSTORAGE)
+// =============================================================================
+const STORAGE_KEY_QUESTIONS = 'TUG_WAR_GEOGRAPHY_QUESTIONS_V2';
+const STORAGE_KEY_TIMELIMIT = 'TUG_WAR_TIMELIMIT_SECONDS';
+
+let questionsList = [];
+
+function loadQuestionsFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_QUESTIONS);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length >= 2) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Lỗi khi đọc questions từ localStorage', e);
+  }
+  return [...DEFAULT_GEOGRAPHY_QUESTIONS];
+}
+
+function saveQuestionsToStorage(list) {
+  questionsList = list;
+  try {
+    localStorage.setItem(STORAGE_KEY_QUESTIONS, JSON.stringify(list));
+  } catch (e) {
+    console.error('Lỗi khi lưu questions vào localStorage', e);
+  }
+  updateQuestionStatsUI();
+}
+
+function updateQuestionStatsUI() {
+  const total = questionsList.length;
+  const countBadge = document.getElementById('q-count-badge');
+  const headerBadge = document.getElementById('header-q-badge');
+  const totalText = document.getElementById('q-total-count-text');
+
+  if (countBadge) countBadge.innerText = total;
+  if (headerBadge) headerBadge.innerText = `${total} Câu Hỏi`;
+  if (totalText) totalText.innerText = total;
+
+  document.querySelectorAll('.total-q-label').forEach(el => {
+    el.innerText = total;
+  });
+}
+
+// =============================================================================
+// 4. GAME STATE
 // =============================================================================
 let currentQuestionIndex = 0;
 let currentTeamTurn = 'blue'; // 'blue' | 'red'
 let ropePosition = 0; // -100 (Blue win) to +100 (Red win)
 let blueScore = 0;
 let redScore = 0;
+let timeLimit = 30; // 30 | 60 | 90 seconds
 let countdown = 30;
 let timerInterval = null;
 let isEvaluating = false;
@@ -116,7 +165,7 @@ let soundEnabled = true;
 let questionHistory = []; // { isCorrect, team, chosenIdx }
 
 // =============================================================================
-// 4. WEB AUDIO API SOUND GENERATOR (ZERO ASSET DEPENDENCIES)
+// 5. WEB AUDIO API SOUND GENERATOR
 // =============================================================================
 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
@@ -147,7 +196,7 @@ function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.2) {
     osc.start();
     osc.stop(ctx.currentTime + duration);
   } catch (e) {
-    // Audio autostart policy safe
+    // Autostart audio safe
   }
 }
 
@@ -160,13 +209,11 @@ function soundUrgentTick() {
 }
 
 function soundPullRope() {
-  // Heave "Hò-zô" sound effect
   playTone(160, 'sawtooth', 0.35, 0.25);
   setTimeout(() => playTone(240, 'triangle', 0.25, 0.2), 120);
 }
 
 function soundCorrect() {
-  // Bright arpeggio chime
   playTone(523.25, 'sine', 0.15, 0.2); // C5
   setTimeout(() => playTone(659.25, 'sine', 0.15, 0.2), 90); // E5
   setTimeout(() => playTone(783.99, 'sine', 0.18, 0.2), 180); // G5
@@ -174,7 +221,6 @@ function soundCorrect() {
 }
 
 function soundWrong() {
-  // Low buzzer
   playTone(220, 'sawtooth', 0.18, 0.25);
   setTimeout(() => playTone(164.81, 'sawtooth', 0.3, 0.25), 150);
 }
@@ -187,58 +233,45 @@ function soundVictory() {
 }
 
 // =============================================================================
-// 5. ATHLETES SPRITE RENDERING (5 BLUE VS 5 RED)
+// 6. ATHLETES SPRITE RENDERING (5 BLUE VS 5 RED)
 // =============================================================================
 function renderAthletes() {
   const blueSquad = document.getElementById('blue-squad-container');
   const redSquad = document.getElementById('red-squad-container');
   if (!blueSquad || !redSquad) return;
 
-  // Blue squad (reversed order so anchor #5 Lý is furthest left, pioneer #1 Quá is closest to rope knot)
   blueSquad.innerHTML = [...BLUE_TEAM].reverse().map(m => `
     <div class="athlete-figure">
       <div class="athlete-nametag nametag-blue">#${m.id} ${m.name}</div>
       <svg viewBox="0 0 40 60" style="width: 28px; height: 42px;">
-        <!-- Head with blue headband -->
         <circle cx="20" cy="13" r="8" fill="#3b82f6"/>
         <rect x="12" y="11" width="16" height="3" rx="1.5" fill="#1e3a8a"/>
-        <!-- Eyes -->
         <circle cx="18" cy="13" r="1.5" fill="#ffffff"/>
         <circle cx="22" cy="13" r="1.5" fill="#ffffff"/>
-        <!-- Torso pulling back left -->
         <path d="M13 22 L27 22 L24 43 L14 43 Z" fill="#1d4ed8"/>
-        <!-- Arms grabbing rope -->
         <path d="M14 26 L5 32 L12 35" stroke="#93c5fd" stroke-width="3" stroke-linecap="round" fill="none"/>
         <path d="M26 26 L16 33 L22 36" stroke="#60a5fa" stroke-width="3" stroke-linecap="round" fill="none"/>
-        <!-- Legs braced back -->
         <path d="M15 43 L9 56 M23 43 L19 56" stroke="#1e3a8a" stroke-width="3.5" stroke-linecap="round"/>
       </svg>
     </div>
   `).join('');
 
-  // Red squad (Anchor #5 Long is furthest right, pioneer #1 Sơn is closest to rope knot)
   redSquad.innerHTML = RED_TEAM.map(m => `
     <div class="athlete-figure">
       <div class="athlete-nametag nametag-red">#${m.id} ${m.name}</div>
       <svg viewBox="0 0 40 60" style="width: 28px; height: 42px;">
-        <!-- Head with red headband -->
         <circle cx="20" cy="13" r="8" fill="#ef4444"/>
         <rect x="12" y="11" width="16" height="3" rx="1.5" fill="#7f1d1d"/>
-        <!-- Eyes -->
         <circle cx="18" cy="13" r="1.5" fill="#ffffff"/>
         <circle cx="22" cy="13" r="1.5" fill="#ffffff"/>
-        <!-- Torso pulling back right -->
         <path d="M13 22 L27 22 L26 43 L16 43 Z" fill="#b91c1c"/>
-        <!-- Arms grabbing rope -->
         <path d="M27 26 L35 32 L28 35" stroke="#fca5a5" stroke-width="3" stroke-linecap="round" fill="none"/>
         <path d="M15 26 L24 33 L18 36" stroke="#f87171" stroke-width="3" stroke-linecap="round" fill="none"/>
-        <!-- Legs braced back -->
         <path d="M17 43 L21 56 M25 43 L31 56" stroke="#7f1d1d" stroke-width="3.5" stroke-linecap="round"/>
       </svg>
     </div>
   `).join('');
 
-  // Render Roster mini lists
   renderRosterChips();
 }
 
@@ -264,21 +297,24 @@ function renderRosterChips() {
 }
 
 // =============================================================================
-// 6. QUESTION RENDERING & CONTROLS
+// 7. QUESTION RENDERING & CONTROLS
 // =============================================================================
 function renderQuestion() {
-  const q = GEOGRAPHY_QUESTIONS[currentQuestionIndex];
-  const isBlue = currentTeamTurn === 'blue';
+  if (currentQuestionIndex >= questionsList.length) {
+    finishMatch();
+    return;
+  }
 
-  // Numbers
+  const q = questionsList[currentQuestionIndex];
+  const isBlue = currentTeamTurn === 'blue';
+  const total = questionsList.length;
+
   document.getElementById('blue-q-current').innerText = currentQuestionIndex + 1;
   document.getElementById('red-q-current').innerText = currentQuestionIndex + 1;
 
-  // Text
   document.getElementById('blue-q-text').innerText = q.question;
   document.getElementById('red-q-text').innerText = q.question;
 
-  // Active status styles
   const bluePanel = document.getElementById('blue-panel');
   const redPanel = document.getElementById('red-panel');
   const blueStatus = document.getElementById('blue-status-pill');
@@ -300,7 +336,6 @@ function renderQuestion() {
     blueStatus.innerText = 'CHỜ LƯỢT';
   }
 
-  // Blue options
   const blueContainer = document.getElementById('blue-options-container');
   blueContainer.innerHTML = q.options.map((opt, idx) => `
     <button class="ans-btn" onclick="handleSelectAnswer('blue', ${idx})" ${!isBlue || isEvaluating ? 'disabled' : ''}>
@@ -309,7 +344,6 @@ function renderQuestion() {
     </button>
   `).join('');
 
-  // Red options
   const redContainer = document.getElementById('red-options-container');
   redContainer.innerHTML = q.options.map((opt, idx) => `
     <button class="ans-btn" onclick="handleSelectAnswer('red', ${idx})" ${isBlue || isEvaluating || (gameMode === 'bot') ? 'disabled' : ''}>
@@ -321,24 +355,23 @@ function renderQuestion() {
   renderProgressDots();
   startTimer();
 
-  // If Red's turn in Bot Mode, simulate thinking and answering
   if (!isBlue && gameMode === 'bot' && !isEvaluating && !isFinished) {
     setTimeout(() => {
       if (currentTeamTurn === 'red' && !isEvaluating && !isFinished) {
-        const willBeCorrect = Math.random() < 0.72; // Bot has 72% accuracy
-        const botChoice = willBeCorrect ? q.correctIndex : (q.correctIndex + 1) % 4;
-        handleSelectAnswer('red', botChoice);
+        const willBeCorrect = Math.random() < 0.70;
+        const botChoice = willBeCorrect ? q.correctIndex : (q.correctIndex + 1) % q.options.length;
+        window.handleSelectAnswer('red', botChoice);
       }
-    }, 1600);
+    }, 1800);
   }
 }
 
-// Progress Stepper 10 Questions
 function renderProgressDots() {
   const container = document.getElementById('dots-stepper');
   if (!container) return;
 
-  container.innerHTML = Array.from({ length: 10 }).map((_, idx) => {
+  const total = questionsList.length;
+  container.innerHTML = Array.from({ length: total }).map((_, idx) => {
     const hist = questionHistory[idx];
     let cls = 'step-bubble';
     let icon = `${idx + 1}`;
@@ -353,11 +386,11 @@ function renderProgressDots() {
 }
 
 // =============================================================================
-// 7. TIMER 30S LOGIC
+// 8. TIMER 30S, 60S, 90S LOGIC
 // =============================================================================
 function startTimer() {
   clearInterval(timerInterval);
-  countdown = 30;
+  countdown = timeLimit;
   updateTimerDisplay();
 
   timerInterval = setInterval(() => {
@@ -373,15 +406,14 @@ function startTimer() {
 
     if (countdown <= 0) {
       clearInterval(timerInterval);
-      // Timeout counts as wrong answer
-      handleSelectAnswer(currentTeamTurn, -1);
+      window.handleSelectAnswer(currentTeamTurn, -1);
     }
   }, 1000);
 }
 
 function updateTimerDisplay() {
   const isBlue = currentTeamTurn === 'blue';
-  const pct = (countdown / 30) * 100;
+  const pct = Math.max(0, (countdown / timeLimit) * 100);
 
   const blueCountdown = document.getElementById('blue-countdown');
   const blueBar = document.getElementById('blue-timer-bar');
@@ -392,40 +424,38 @@ function updateTimerDisplay() {
     blueCountdown.innerText = `${countdown}s`;
     blueBar.style.width = `${pct}%`;
     blueBar.className = countdown <= 5 ? 'timer-bar-inner timer-bar-urgent' : 'timer-bar-inner timer-bar-blue';
-    redCountdown.innerText = '30s';
+    redCountdown.innerText = `${timeLimit}s`;
     redBar.style.width = '100%';
     redBar.className = 'timer-bar-inner timer-bar-red';
   } else {
     redCountdown.innerText = `${countdown}s`;
     redBar.style.width = `${pct}%`;
     redBar.className = countdown <= 5 ? 'timer-bar-inner timer-bar-urgent' : 'timer-bar-inner timer-bar-red';
-    blueCountdown.innerText = '30s';
+    blueCountdown.innerText = `${timeLimit}s`;
     blueBar.style.width = '100%';
     blueBar.className = 'timer-bar-inner timer-bar-blue';
   }
 }
 
 // =============================================================================
-// 8. EVALUATION & TUG-OF-WAR PULL ACTION
+// 9. EVALUATION & TUG-OF-WAR PULL ACTION
 // =============================================================================
 window.handleSelectAnswer = function(team, chosenIdx) {
   if (isEvaluating || isFinished || team !== currentTeamTurn) return;
   isEvaluating = true;
   clearInterval(timerInterval);
 
-  const q = GEOGRAPHY_QUESTIONS[currentQuestionIndex];
+  const q = questionsList[currentQuestionIndex];
   const isCorrect = chosenIdx === q.correctIndex;
   let pullTeam = team;
   let strokes = 1;
 
   if (isCorrect) {
-    // Correct: current team pulls 1 stroke
     pullTeam = team;
     strokes = 1;
     soundCorrect();
     if (team === 'blue') blueScore++; else redScore++;
   } else {
-    // Wrong: opponent team pulls 2 strokes
     pullTeam = team === 'blue' ? 'red' : 'blue';
     strokes = 2;
     soundWrong();
@@ -433,24 +463,19 @@ window.handleSelectAnswer = function(team, chosenIdx) {
 
   questionHistory[currentQuestionIndex] = { isCorrect, team, chosenIdx };
 
-  // Calculate rope displacement: Blue shifts negative (-), Red shifts positive (+)
-  // 1 stroke = 15%, 2 strokes = 30%
   const shiftAmount = (pullTeam === 'blue' ? -15 : 15) * strokes;
   ropePosition = Math.max(-100, Math.min(100, ropePosition + shiftAmount));
 
-  // Update arena visual & audio
   setTimeout(soundPullRope, 250);
   updateArenaPosition();
   showEvaluationCard(isCorrect, pullTeam, strokes, q);
 
-  // Check early victory if rope reached threshold
-  if (ropePosition <= -100 || ropePosition >= 100 || currentQuestionIndex === 9) {
+  if (ropePosition <= -100 || ropePosition >= 100 || currentQuestionIndex === questionsList.length - 1) {
     setTimeout(finishMatch, 1600);
   }
 };
 
 function updateArenaPosition() {
-  // Max pixel offset on stage
   const maxPx = 60;
   const pixelOffset = (ropePosition / 100) * maxPx;
   const stage = document.getElementById('pull-stage-canvas');
@@ -458,7 +483,6 @@ function updateArenaPosition() {
     stage.style.transform = `translateX(${pixelOffset}px)`;
   }
 
-  // Advantage percentages
   const bluePercent = Math.round(50 - (ropePosition / 2));
   const redPercent = 100 - bluePercent;
 
@@ -467,7 +491,6 @@ function updateArenaPosition() {
   document.getElementById('gauge-label-blue').innerText = `Xanh ${bluePercent}%`;
   document.getElementById('gauge-label-red').innerText = `Đỏ ${redPercent}%`;
 
-  // Score text
   document.getElementById('blue-score-num').innerText = blueScore;
   document.getElementById('red-score-num').innerText = redScore;
 }
@@ -489,25 +512,17 @@ function showEvaluationCard(isCorrect, pullTeam, strokes, q) {
     details.innerHTML = `Đối thủ <strong>${pullTeam === 'blue' ? 'Xanh' : 'Đỏ'}</strong> được kéo <strong>${strokes} nhịp</strong> (+30%)!`;
   }
 
-  expl.innerHTML = `<strong>Đáp án đúng:</strong> ${q.options[q.correctIndex]}<br><span style="display:inline-block; margin-top:4px;">${q.explanation}</span>`;
+  const correctText = q.options[q.correctIndex] || 'Đáp án đúng';
+  expl.innerHTML = `<strong>Đáp án đúng:</strong> ${correctText}<br><span style="display:inline-block; margin-top:4px;">${q.explanation || 'Không có giải thích chi tiết.'}</span>`;
 }
-
-// Next Question button listener
-document.addEventListener('DOMContentLoaded', () => {
-  const nextBtn = document.getElementById('btn-next-step');
-  if (nextBtn) {
-    nextBtn.addEventListener('click', proceedToNext);
-  }
-});
 
 function proceedToNext() {
   if (isFinished) return;
   document.getElementById('evaluation-card').style.display = 'none';
   isEvaluating = false;
 
-  if (currentQuestionIndex < 9) {
+  if (currentQuestionIndex < questionsList.length - 1) {
     currentQuestionIndex++;
-    // Alternate turn between Blue and Red
     currentTeamTurn = currentTeamTurn === 'blue' ? 'red' : 'blue';
     renderQuestion();
   } else {
@@ -516,7 +531,7 @@ function proceedToNext() {
 }
 
 // =============================================================================
-// 9. VICTORY & RESTART
+// 10. VICTORY & RESTART
 // =============================================================================
 function finishMatch() {
   isFinished = true;
@@ -537,19 +552,20 @@ function finishMatch() {
   if (winner === 'blue') {
     title.innerText = '🏆 ĐỘI XANH VÔ ĐỊCH!';
     title.style.color = '#60a5fa';
-    sub.innerText = 'Quá, Mập, Nhiên, Hạo và Lý đã kéo dây qua vạch và giành chiến thắng ngoạn mục!';
+    sub.innerText = 'Quá, Mập, Nhiên, Hạo và Lý đã kéo dây qua vạch và giành chiến thắng!';
   } else if (winner === 'red') {
     title.innerText = '🏆 ĐỘI ĐỎ VÔ ĐỊCH!';
     title.style.color = '#f87171';
-    sub.innerText = 'Sơn, Hải, Đức, Cường và Long đã kéo dây qua vạch và giành chiến thắng ngoạn mục!';
+    sub.innerText = 'Sơn, Hải, Đức, Cường và Long đã kéo dây qua vạch và giành chiến thắng!';
   } else {
     title.innerText = '🤝 KẾT QUẢ HÒA!';
     title.style.color = '#fbbf24';
     sub.innerText = 'Hai đội ngang tài ngang sức trên từng mét dây!';
   }
 
-  document.getElementById('final-score-blue').innerText = `${blueScore}/10`;
-  document.getElementById('final-score-red').innerText = `${redScore}/10`;
+  const total = questionsList.length;
+  document.getElementById('final-score-blue').innerText = `${blueScore}/${total}`;
+  document.getElementById('final-score-red').innerText = `${redScore}/${total}`;
 }
 
 function resetGame() {
@@ -562,28 +578,225 @@ function resetGame() {
   isFinished = false;
   questionHistory = [];
 
-  document.getElementById('evaluation-card').style.display = 'none';
-  document.getElementById('victory-modal').style.display = 'none';
+  const evalCard = document.getElementById('evaluation-card');
+  if (evalCard) evalCard.style.display = 'none';
+  const victoryModal = document.getElementById('victory-modal');
+  if (victoryModal) victoryModal.style.display = 'none';
+
   updateArenaPosition();
   renderQuestion();
 }
 
 // =============================================================================
-// 10. MODAL TOGGLES & TOOLBAR LISTENERS
+// 11. QUẢN LÝ CÂU HỎI (THÊM / SỬA / XÓA / RESET)
+// =============================================================================
+function renderQuestionsManager() {
+  const container = document.getElementById('q-items-container');
+  if (!container) return;
+
+  if (questionsList.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+        Chưa có câu hỏi nào. Hãy nhấn <strong>Thêm câu hỏi mới</strong> hoặc <strong>Khôi phục 10 câu gốc</strong>.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = questionsList.map((q, idx) => `
+    <div class="q-item-card" id="q-card-${q.id}">
+      <div class="q-item-header">
+        <div class="q-item-title">
+          <strong style="color: var(--gold-light);">#${idx + 1}.</strong> ${escapeHtml(q.question)}
+        </div>
+        <div class="q-item-actions">
+          <button class="q-btn-icon" onclick="openEditQuestion(${q.id})" title="Chỉnh sửa câu hỏi này">
+            ✏️ Sửa
+          </button>
+          <button class="q-btn-icon q-btn-delete" onclick="handleDeleteQuestion(${q.id})" title="Xóa câu hỏi này">
+            🗑️ Xóa
+          </button>
+        </div>
+      </div>
+
+      <div class="q-options-preview">
+        ${q.options.map((opt, oIdx) => `
+          <div class="q-opt-chip ${oIdx === q.correctIndex ? 'correct-chip' : ''}">
+            <strong>${['A','B','C','D'][oIdx]}:</strong> ${escapeHtml(opt)}
+            ${oIdx === q.correctIndex ? ' (Đúng ✓)' : ''}
+          </div>
+        `).join('')}
+      </div>
+
+      ${q.explanation ? `
+        <div class="q-explanation-preview">
+          <strong>💡 Giải thích:</strong> ${escapeHtml(q.explanation)}
+        </div>
+      ` : ''}
+    </div>
+  `).join('');
+}
+
+function openAddQuestionModal() {
+  document.getElementById('q-form-modal-title').innerHTML = `<span>➕</span> Thêm câu hỏi mới`;
+  document.getElementById('form-q-id').value = '';
+  document.getElementById('form-q-text').value = '';
+  document.getElementById('form-opt-0').value = '';
+  document.getElementById('form-opt-1').value = '';
+  document.getElementById('form-opt-2').value = '';
+  document.getElementById('form-opt-3').value = '';
+  document.getElementById('form-q-correct').value = '0';
+  document.getElementById('form-q-explanation').value = '';
+
+  document.getElementById('q-form-modal').style.display = 'flex';
+}
+
+window.openEditQuestion = function(id) {
+  const q = questionsList.find(item => item.id === id);
+  if (!q) return;
+
+  document.getElementById('q-form-modal-title').innerHTML = `<span>✏️</span> Chỉnh sửa câu hỏi`;
+  document.getElementById('form-q-id').value = q.id;
+  document.getElementById('form-q-text').value = q.question;
+  document.getElementById('form-opt-0').value = q.options[0] || '';
+  document.getElementById('form-opt-1').value = q.options[1] || '';
+  document.getElementById('form-opt-2').value = q.options[2] || '';
+  document.getElementById('form-opt-3').value = q.options[3] || '';
+  document.getElementById('form-q-correct').value = q.correctIndex;
+  document.getElementById('form-q-explanation').value = q.explanation || '';
+
+  document.getElementById('q-form-modal').style.display = 'flex';
+};
+
+window.handleDeleteQuestion = function(id) {
+  if (questionsList.length <= 2) {
+    alert('Cần giữ lại tối thiểu 2 câu hỏi để đảm bảo trận đấu diễn ra bình thường!');
+    return;
+  }
+
+  const confirmDelete = confirm('Bạn có chắc chắn muốn xóa câu hỏi này không?');
+  if (!confirmDelete) return;
+
+  const updated = questionsList.filter(item => item.id !== id);
+  saveQuestionsToStorage(updated);
+  renderQuestionsManager();
+  resetGame();
+};
+
+function handleSaveQuestionForm(e) {
+  e.preventDefault();
+  const idVal = document.getElementById('form-q-id').value;
+  const questionText = document.getElementById('form-q-text').value.trim();
+  const opt0 = document.getElementById('form-opt-0').value.trim();
+  const opt1 = document.getElementById('form-opt-1').value.trim();
+  const opt2 = document.getElementById('form-opt-2').value.trim();
+  const opt3 = document.getElementById('form-opt-3').value.trim();
+  const correctIdx = parseInt(document.getElementById('form-q-correct').value, 10);
+  const explanation = document.getElementById('form-q-explanation').value.trim();
+
+  if (!questionText || !opt0 || !opt1 || !opt2 || !opt3) {
+    alert('Vui lòng điền đầy đủ câu hỏi và 4 phương án trả lời!');
+    return;
+  }
+
+  const newOptions = [opt0, opt1, opt2, opt3];
+
+  if (idVal) {
+    // Chỉnh sửa câu hỏi hiện có
+    const targetId = parseInt(idVal, 10);
+    const updated = questionsList.map(item => {
+      if (item.id === targetId) {
+        return {
+          ...item,
+          question: questionText,
+          options: newOptions,
+          correctIndex: correctIdx,
+          explanation: explanation
+        };
+      }
+      return item;
+    });
+    saveQuestionsToStorage(updated);
+  } else {
+    // Thêm câu hỏi mới
+    const nextId = questionsList.length > 0 ? Math.max(...questionsList.map(q => q.id)) + 1 : 1;
+    const newQuestion = {
+      id: nextId,
+      question: questionText,
+      options: newOptions,
+      correctIndex: correctIdx,
+      explanation: explanation
+    };
+    saveQuestionsToStorage([...questionsList, newQuestion]);
+  }
+
+  document.getElementById('q-form-modal').style.display = 'none';
+  renderQuestionsManager();
+  resetGame();
+}
+
+function handleResetDefaultQuestions() {
+  const ok = confirm('Bạn có chắc chắn muốn khôi phục lại danh sách 10 câu hỏi Địa lý mặc định ban đầu không?');
+  if (!ok) return;
+
+  saveQuestionsToStorage([...DEFAULT_GEOGRAPHY_QUESTIONS]);
+  renderQuestionsManager();
+  resetGame();
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// =============================================================================
+// 12. INITIALIZATION & EVENT LISTENERS
 // =============================================================================
 window.addEventListener('DOMContentLoaded', () => {
+  // Load questions
+  questionsList = loadQuestionsFromStorage();
+  updateQuestionStatsUI();
+
+  // Load time limit setting
+  const savedTime = localStorage.getItem(STORAGE_KEY_TIMELIMIT);
+  if (savedTime && ['30', '60', '90'].includes(savedTime)) {
+    timeLimit = parseInt(savedTime, 10);
+  }
+  const selectTurnTime = document.getElementById('select-turn-time');
+  if (selectTurnTime) {
+    selectTurnTime.value = String(timeLimit);
+    selectTurnTime.addEventListener('change', (e) => {
+      timeLimit = parseInt(e.target.value, 10);
+      try {
+        localStorage.setItem(STORAGE_KEY_TIMELIMIT, String(timeLimit));
+      } catch (err) {}
+      startTimer();
+    });
+  }
+
+  // Render Athletes, initial question and arena
   renderAthletes();
   renderQuestion();
   updateArenaPosition();
 
-  // Reset Button
+  // Next step button
+  const nextBtn = document.getElementById('btn-next-step');
+  if (nextBtn) {
+    nextBtn.addEventListener('click', proceedToNext);
+  }
+
+  // Reset Game
   const btnRestart = document.getElementById('btn-reset-game');
   if (btnRestart) btnRestart.addEventListener('click', resetGame);
 
   const btnPlayAgain = document.getElementById('btn-modal-play-again');
   if (btnPlayAgain) btnPlayAgain.addEventListener('click', resetGame);
 
-  // Mode select
+  // Game mode select (Bot vs PvP)
   const modeSelect = document.getElementById('select-game-mode');
   if (modeSelect) {
     modeSelect.addEventListener('change', (e) => {
@@ -624,8 +837,52 @@ window.addEventListener('DOMContentLoaded', () => {
     closeRosterBtn.addEventListener('click', () => { rosterModal.style.display = 'none'; });
   }
 
-  // Close modals on clicking backdrop
-  [rulesModal, rosterModal, document.getElementById('victory-modal')].forEach(m => {
+  // Questions Manager Modal
+  const qManagerBtn = document.getElementById('btn-manage-questions');
+  const qManagerModal = document.getElementById('questions-modal');
+  const closeQModalBtn = document.getElementById('btn-close-q-modal');
+  if (qManagerBtn && qManagerModal) {
+    qManagerBtn.addEventListener('click', () => {
+      renderQuestionsManager();
+      qManagerModal.style.display = 'flex';
+    });
+  }
+  if (closeQModalBtn && qManagerModal) {
+    closeQModalBtn.addEventListener('click', () => {
+      qManagerModal.style.display = 'none';
+    });
+  }
+
+  // Add Question Button
+  const btnOpenAddQ = document.getElementById('btn-open-add-q');
+  if (btnOpenAddQ) {
+    btnOpenAddQ.addEventListener('click', openAddQuestionModal);
+  }
+
+  // Reset Default Questions Button
+  const btnResetDefault = document.getElementById('btn-reset-default-q');
+  if (btnResetDefault) {
+    btnResetDefault.addEventListener('click', handleResetDefaultQuestions);
+  }
+
+  // Form Question Modal
+  const formQuestion = document.getElementById('form-question');
+  if (formQuestion) {
+    formQuestion.addEventListener('submit', handleSaveQuestionForm);
+  }
+
+  const btnCancelForm = document.getElementById('btn-cancel-form');
+  const btnCloseFormModal = document.getElementById('btn-close-form-modal');
+  const qFormModal = document.getElementById('q-form-modal');
+  if (btnCancelForm && qFormModal) {
+    btnCancelForm.addEventListener('click', () => { qFormModal.style.display = 'none'; });
+  }
+  if (btnCloseFormModal && qFormModal) {
+    btnCloseFormModal.addEventListener('click', () => { qFormModal.style.display = 'none'; });
+  }
+
+  // Close modals on clicking background backdrop
+  [rulesModal, rosterModal, qManagerModal, qFormModal, document.getElementById('victory-modal')].forEach(m => {
     if (m) {
       m.addEventListener('click', (e) => {
         if (e.target === m && m.id !== 'victory-modal') {
