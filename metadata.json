@@ -1,0 +1,6 @@
+{
+  "name": "Trò Chơi Kéo Co Địa Lý 5v5",
+  "description": "Trò chơi kéo co đối kháng 5v5 giữa Đội Xanh và Đội Đỏ, tích hợp 10 câu hỏi Địa lý: trả lời đúng kéo 1 nhịp, trả lời sai đối thủ kéo 2 nhịp.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

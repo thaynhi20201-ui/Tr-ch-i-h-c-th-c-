@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trò Chơi Kéo Co Địa Lý 5v5</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="game-header container">
+    <div class="header-brand">
+      <div class="brand-icon">🚩</div>
+      <div>
+        <div class="brand-title">
+          TRÒ CHƠI KÉO CO ĐỊA LÝ 5v5
+          <span class="badge-tag">10 Câu Hỏi</span>
+        </div>
+        <div class="brand-sub">Đúng kéo 1 nhịp • Sai đối thủ kéo 2 nhịp • 30s/câu</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <select id="game-mode-select" class="btn-ctrl">
+        <option value="bot">Đấu với Máy (AI)</option>
+        <option value="pvp">2 Người chơi (PvP)</option>
+      </select>
+      <button id="btn-sound-toggle" class="btn-ctrl">
+        🔊 <span id="sound-label">Bật</span>
+      </button>
+      <button id="btn-restart-match" class="btn-ctrl btn-primary">
+        🔄 Ván mới
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN 3-COLUMN LAYOUT -->
+  <main class="stage-grid container">
+
+    <!-- 1. BẢNG CÂU HỎI ĐỘI XANH (BÊN TRÁI) -->
+    <section id="blue-panel" class="quiz-panel blue-active">
+      <div class="panel-header">
+        <div class="team-badge">
+          <div class="team-avatar avatar-blue">X</div>
+          <div>
+            <div class="team-name blue">
+              ĐỘI XANH
+              <span id="blue-turn-badge" class="turn-pill active-blue">LƯỢT TRẢ LỜI</span>
+            </div>
+            <div style="font-size: 11px; color: #94a3b8;">Đúng: <strong id="blue-score" style="color: #93c5fd;">0</strong>/10</div>
+          </div>
+        </div>
+
+        <div class="timer-box">
+          <div class="timer-digits" id="blue-timer-text">
+            ⏱️ <span id="blue-countdown" style="color: #60a5fa;">30s</span>
+          </div>
+          <div class="timer-bar-bg">
+            <div id="blue-timer-bar" class="timer-bar-fill bar-blue"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5 Thành viên -->
+      <div class="roster-box">
+        <span class="roster-label">5 Thành viên:</span>
+        <span class="roster-chip chip-blue">#1 Quá</span>
+        <span class="roster-chip chip-blue">#2 Mập</span>
+        <span class="roster-chip chip-blue">#3 Nhiên</span>
+        <span class="roster-chip chip-blue">#4 Hạo</span>
+        <span class="roster-chip chip-blue">#5 Lý</span>
+      </div>
+
+      <!-- Khung câu hỏi -->
+      <div class="question-card">
+        <div class="question-meta">
+          <span>CÂU HỎI <strong id="blue-q-num">1</strong>/10</span>
+          <span style="color: #fbbf24;">Chủ đề Địa lý</span>
+        </div>
+        <div id="blue-question-text" class="question-title">Đang tải câu hỏi...</div>
+      </div>
+
+      <!-- 4 Lựa chọn A, B, C, D -->
+      <div id="blue-options-container" class="options-list"></div>
+    </section>
+
+    <!-- 2. BẢNG KÉO CO Ở GIỮA NHỎ LẠI -->
+    <section class="arena-wrapper">
+      <div class="arena-box">
+        
+        <div style="position: absolute; top: 6px; left: 8px; right: 8px; display: flex; justify-content: space-between; font-size: 8px; font-weight: 800; z-index: 10;">
+          <span style="background: rgba(37,99,235,0.2); color: #1e3a8a; padding: 2px 6px; border-radius: 4px; border: 1px solid #93c5fd;">VẠCH XANH</span>
+          <span style="background: rgba(220,38,38,0.2); color: #7f1d1d; padding: 2px 6px; border-radius: 4px; border: 1px solid #fca5a5;">VẠCH ĐỎ</span>
+        </div>
+
+        <div class="arena-ground">
+          <div class="center-chalk">
+            <div class="center-marker-dot"></div>
+            <span class="center-marker-text">0</span>
+          </div>
+          <div class="win-line-left">
+            <span class="win-label label-left">Thắng</span>
+          </div>
+          <div class="win-line-right">
+            <span class="win-label label-right">Thắng</span>
+          </div>
+        </div>
+
+        <!-- Khung giật dây thừng và nhân vật -->
+        <div id="dynamic-pull-stage" class="pull-stage">
+          <div class="rope-line">
+            <div class="rope-texture"></div>
+            <div class="flag-knot">
+              <div class="flag-ball"></div>
+              <div class="flag-tail"></div>
+            </div>
+          </div>
+
+          <div class="arena-roster-row">
+            <div id="blue-team-sprites" class="sprites-group"></div>
+            <div style="width: 20px;"></div>
+            <div id="red-team-sprites" class="sprites-group"></div>
+          </div>
+        </div>
+
+        <!-- Thanh ưu thế -->
+        <div class="advantage-box">
+          <div class="gauge-track">
+            <div id="gauge-blue" class="gauge-blue" style="width: 50%;"></div>
+            <div id="gauge-red" class="gauge-red" style="width: 50%;"></div>
+          </div>
+          <div class="gauge-labels">
+            <span id="gauge-blue-text">Xanh 50%</span>
+            <span id="gauge-red-text">Đỏ 50%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bảng tiến trình & giải thích -->
+      <div class="center-card">
+        <div class="dots-wrapper">
+          <span style="font-size: 11px; font-weight: 800; color: #94a3b8;">10 Câu:</span>
+          <div id="dots-progress" class="dots-list"></div>
+        </div>
+
+        <div class="rule-summary">
+          <span class="rule-pill-ok">✓ Đúng: Kéo 1 nhịp</span>
+          <span class="rule-pill-err">✗ Sai: Đối thủ kéo 2 nhịp!</span>
+        </div>
+
+        <div id="result-card" class="explanation-banner" style="display: none;">
+          <div id="result-badge" style="font-weight: 900; margin-bottom: 4px;"></div>
+          <div id="result-explanation"></div>
+          <button id="btn-next-question" class="btn-ctrl btn-primary" style="width: 100%; margin-top: 10px; padding: 10px;">
+            Tiếp tục câu tiếp theo ➔
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. BẢNG CÂU HỎI ĐỘI ĐỎ (BÊN PHẢI) -->
+    <section id="red-panel" class="quiz-panel inactive">
+      <div class="panel-header">
+        <div class="team-badge">
+          <div class="team-avatar avatar-red">Đ</div>
+          <div>
+            <div class="team-name red">
+              ĐỘI ĐỎ
+              <span id="red-turn-badge" class="turn-pill wait">CHỜ LƯỢT</span>
+            </div>
+            <div style="font-size: 11px; color: #94a3b8;">Đúng: <strong id="red-score" style="color: #fca5a5;">0</strong>/10</div>
+          </div>
+        </div>
+
+        <div class="timer-box">
+          <div class="timer-digits" id="red-timer-text">
+            ⏱️ <span id="red-countdown" style="color: #94a3b8;">30s</span>
+          </div>
+          <div class="timer-bar-bg">
+            <div id="red-timer-bar" class="timer-bar-fill bar-red"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5 Thành viên -->
+      <div class="roster-box">
+        <span class="roster-label">5 Thành viên:</span>
+        <span class="roster-chip chip-red">#1 Sơn</span>
+        <span class="roster-chip chip-red">#2 Hải</span>
+        <span class="roster-chip chip-red">#3 Đức</span>
+        <span class="roster-chip chip-red">#4 Cường</span>
+        <span class="roster-chip chip-red">#5 Long</span>
+      </div>
+
+      <!-- Khung câu hỏi -->
+      <div class="question-card">
+        <div class="question-meta">
+          <span>CÂU HỎI <strong id="red-q-num">1</strong>/10</span>
+          <span style="color: #fbbf24;">Chủ đề Địa lý</span>
+        </div>
+        <div id="red-question-text" class="question-title">Đang tải câu hỏi...</div>
+      </div>
+
+      <!-- 4 Lựa chọn A, B, C, D -->
+      <div id="red-options-container" class="options-list"></div>
+    </section>
+
+  </main>
+
+  <!-- VICTORY MODAL -->
+  <div id="victory-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-content">
+      <div class="trophy-badge">🏆</div>
+      <h2 id="victory-title" style="font-size: 22px; font-weight: 900; margin-bottom: 6px;">ĐỘI XANH CHIẾN THẮNG!</h2>
+      <p id="victory-subtitle" style="font-size: 12px; color: #cbd5e1; margin-bottom: 18px;">
+        Trận kéo co kết thúc với chiến thắng thuyết phục!
+      </p>
+
+      <div style="width: 100%; background: #020617; border: 1px solid #1e293b; border-radius: 14px; padding: 12px; display: flex; justify-content: space-around; margin-bottom: 18px;">
+        <div>
+          <div style="font-size: 11px; color: #94a3b8;">Đội Xanh</div>
+          <div id="final-blue-score" style="font-size: 20px; font-weight: 900; color: #60a5fa;">0</div>
+        </div>
+        <div style="width: 1px; background: #1e293b;"></div>
+        <div>
+          <div style="font-size: 11px; color: #94a3b8;">Đội Đỏ</div>
+          <div id="final-red-score" style="font-size: 20px; font-weight: 900; color: #f87171;">0</div>
+        </div>
+      </div>
+
+      <button id="btn-play-again" class="btn-ctrl btn-primary" style="width: 100%; padding: 12px; font-size: 14px;">
+        🔄 Chơi ván mới ngay
+      </button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
